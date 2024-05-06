@@ -343,8 +343,8 @@
 
 	  setInterval(function ( ) {
 
-  $.getJSON('/config.json', function(data1) {
-     $.getJSON('/state', function(data) {
+  $.getJSON('/config.json', function (data1) {
+     $.getJSON('/state', function (data) {
 // Récupérer les données du JSON
       var state = data.state;
 	  if (state == 'Reseau') {state = 'Réseau' ; }
@@ -390,6 +390,20 @@
 
   }, 2000);
   
+ 			
+var recupconfig = $.get ({
+		url : '/config',
+		type : 'GET',
+		dataType: "text",
+		async: false }).responseText; 
+				  
+ var config = recupconfig.split(";");
+
+}
+
+
+	
+
 				  
 function sendservermode (mode) {
 
