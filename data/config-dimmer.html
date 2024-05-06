@@ -9,7 +9,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Pv router - Configuration</title>
+  <title>Pv routeur - Configuration</title>
 
   <!-- Custom fonts for this template-->
   <link href="all.min.css" rel="stylesheet" type="text/css"> 
@@ -33,7 +33,7 @@
         <div class="sidebar-brand-icon rotate-n-15">
           <i class="fas fa-laugh-wink"></i>
         </div>
-        <div class="sidebar-brand-text mx-3" id="name">Pv router</div>
+        <div class="sidebar-brand-text mx-3" id="name">Pv routeur</div>
       </a>
 
       <!-- Divider -->
@@ -41,13 +41,16 @@
 
       <!-- Nav Item - Dashboard -->
       <li class="nav-item active">
-        <a class="nav-link" href="/" target="_blank" rel="noopener">
+        <a class="nav-link" href="/">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Dashboard</span><br>
-          <span id="version">Version: </span><br>
-          <span id="RSSI">RSSI (dB): </span>
-        </a>
-		  </li>
+          <span>Tableau de bord</span><br>
+          <i class="fas fa-fw fa-code-branch"></i>
+		<span id="version">Version </span><br>
+		<br>
+		<i class="fa fa-wifi"></i>
+    <span id="RSSI">Signal WiFi: </span>
+</a> 
+      </li
 
 
 
@@ -168,7 +171,7 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">State</div>
+                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">état</div>
                       <div class="h5 mb-0 font-weight-bold text-gray-800"><span id="state">0</span></div>
                     </div>
                     <div class="col-auto">
@@ -185,8 +188,8 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Sigma</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800"><span id="sigma">0</span></div>
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">wattmètre</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800"><span id="sigma">W</span></div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-plug fa-2x text-gray-300"></i>
@@ -228,7 +231,7 @@
     
       <div class="card position-relative">
         <div class="card-header py-3">
-          <h6 class="m-0 font-weight-bold text-primary">Configuration</h6>
+          <h6 class="m-0 font-weight-bold text-primary">Paramètres</h6>
             <span id="saveform"></span>
         </div>
         <div class="card-body">
@@ -248,7 +251,7 @@
 
                 <div class="form-group row">
                       <div class="col-sm-6">
-                              Dimmer IP:<input type="text" class="form-control form-control-user" id="dimmer" placeholder="%DIMMER%">
+                              IP gradateur:<input type="text" class="form-control form-control-user" id="dimmer" placeholder="%DIMMER%">
                     </div>
 
                 </div> 
@@ -268,14 +271,14 @@
                     <div class="col-sm-3">
                     <div class="custom-control custom-checkbox small">
                             <input type="checkbox" class="custom-control-input" id="dimmerlocal" onchange="sendservermode('dimmerlocal');">
-                            <label class="custom-control-label" for="dimmerlocal" >Dimmer local</label>
+                            <label class="custom-control-label" for="dimmerlocal" >Gradateur local local</label>
                     </div>
                     </div>
                     <div class="col-sm-3">
                         Limiteur local (%): <input type="number"  step="1" class="form-control form-control-user" id="Fusiblelocal" placeholder="%FUSELOCAL%">
                     </div>
                     <div class="col-sm-3">
-                      Max temp (°C): <input type="number" step="1"class="form-control form-control-user" id="maxtemp" placeholder="%MAXTEMP%">
+                      Temp. maxi (°C) <input type="number" step="1"class="form-control form-control-user" id="maxtemp" placeholder="%MAXTEMP%">
                     </div>
 
                 </div>
