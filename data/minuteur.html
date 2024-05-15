@@ -148,6 +148,23 @@
       var minute = data.minute < 10 ? "0" + data.minute : data.minute;
       $("#heure").html( heure + ":" + minute );
     });
+	
+	
+      //<!-- rafraichissement valeurs -->
+      setInterval(function refreshsend( ) {
+        $.getJSON('/state', function(data) {
+          // Récupérer les données du JSON
+            var version = data.version;
+            var rssi = data.RSSI;
+			var name = data.name;
+          document.getElementById("version").innerHTML = version;
+          document.getElementById("RSSI").innerHTML = 'Signal WiFi: ' + rssi  + ' dBm';
+		  document.getElementById("name").innerHTML = name  ;
+          });
+          }, 5000);
+		
+		
+
 
     // Envoi des données de formulaire au serveur lors de la soumission du formulaire
     $("#dimmer-form").submit(function(event) {

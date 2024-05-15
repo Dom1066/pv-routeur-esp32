@@ -297,6 +297,23 @@ function save () {
 
 }
 
+
+      //<!-- rafraichissement valeurs -->
+      setInterval(function refreshsend( ) {
+        $.getJSON('/state', function(data) {
+          // Récupérer les données du JSON
+            var version = data.version;
+            var rssi = data.RSSI;
+			var name = data.name;
+          document.getElementById("version").innerHTML = version;
+          document.getElementById("RSSI").innerHTML = 'Signal WiFi: ' + rssi  + ' dBm';
+		  document.getElementById("name").innerHTML = name  ;
+          });
+          }, 5000);
+
+
+
+
 function sendservermode (mode) {
 
 $.get( "/get", { servermode: mode } )
