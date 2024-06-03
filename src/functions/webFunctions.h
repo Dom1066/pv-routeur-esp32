@@ -171,6 +171,10 @@ server.on("/minuteur.html",  HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "application/json", getState().c_str());
   });
 
+  server.on("/statefull", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "application/json", getStateFull().c_str());
+  });
+
   
   server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "application/json", getconfig().c_str());
@@ -192,10 +196,12 @@ server.on("/wifi.html", HTTP_GET, [](AsyncWebServerRequest *request){
       compress_html(request,"/wifi.html.gz", "text/html");
   });
 
-
 server.on("/getwifi", HTTP_ANY, [] (AsyncWebServerRequest *request) {
   serveur_response(request, getwifi());
-  
+});
+
+server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request) {
+  request->send(200, "text/plain", "pong");
 });
 
 ///////////////
@@ -208,13 +214,10 @@ server.on("/mqtt.html", HTTP_GET, [](AsyncWebServerRequest *request){
 
 server.on("/getmqtt", HTTP_ANY, [] (AsyncWebServerRequest *request) {
   request->send(200, "application/json",  getmqtt().c_str()); 
-
 });
 
 server.on("/log.txt", HTTP_ANY, [] (AsyncWebServerRequest *request) {
   request->send(SPIFFS, "/log.txt", "text/plain"); 
-  
-
 });
  /// il serait bien que /getmqtt et getwifi soit directement en processing de l'appel de la page 
 
@@ -229,7 +232,6 @@ server.on("/cs", HTTP_ANY, [](AsyncWebServerRequest *request){
     serveur_response(request, logging.Get_log_init().c_str());
     // reinit de logging.log_init 
     logging.reset_log_init(); 
-
   });
 
 
@@ -269,7 +271,8 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
                           
 	   // doc /get?cycle=x
     if (request->hasParam(PARAM_INPUT_save)) { Serial.println(F("Saving configuration..."));
-                          logging.Set_log_init("Configuration saved\r\n",true); // configuration sauvegardée
+
+                                                    logging.Set_log_init(config.saveConfiguration(),true); // configuration sauvegardée
                             }
                            
 	 if (request->hasParam(PARAM_INPUT_2)) { config.cycle = request->getParam(PARAM_INPUT_2)->value().toInt(); }
@@ -288,10 +291,10 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
    if (request->hasParam(PARAM_INPUT_dimmer_power)) {gDisplayValues.dimmer = request->getParam( PARAM_INPUT_dimmer_power)->value().toInt(); gDisplayValues.change = 1 ;  } 
    if (request->hasParam(PARAM_INPUT_facteur)) { config.facteur = request->getParam(PARAM_INPUT_facteur)->value().toFloat();}
    if (request->hasParam(PARAM_INPUT_tmax)) { config.tmax = request->getParam(PARAM_INPUT_tmax)->value().toInt();}
-   if (request->hasParam("resistance")) { config.resistance = request->getParam("resistance")->value().toInt(); config.calcul_charge(); }
+   if (request->hasParam("resistance")) { config.charge1 = request->getParam("resistance")->value().toInt(); config.calcul_charge(); }
    if (request->hasParam("resistance2")) { config.charge2 = request->getParam("resistance2")->value().toInt(); config.calcul_charge();}
    if (request->hasParam("resistance3")) { config.charge3 = request->getParam("resistance3")->value().toInt(); config.calcul_charge();}
-   if (request->hasParam("screentime")) { config.ScreenTime = request->getParam("screentime")->value().toInt();config.calcul_charge(); } 
+   if (request->hasParam("screentime")) { config.ScreenTime = request->getParam("screentime")->value().toInt(); } 
    if (request->hasParam("voltage")) { config.voltage = request->getParam("voltage")->value().toInt();}
    if (request->hasParam("offset")) { config.offset = request->getParam("offset")->value().toInt();}
    
@@ -329,7 +332,7 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
    //// MQTT
    if (request->hasParam(PARAM_INPUT_mqttserver)) { request->getParam(PARAM_INPUT_mqttserver)->value().toCharArray(config.mqttserver,16);  }
    if (request->hasParam(PARAM_INPUT_publish)) { request->getParam(PARAM_INPUT_publish)->value().toCharArray(config.Publish,100); 
-      logging.Set_log_init("Configuration saved\r\n",true); // configuration sauvegardée   
+     logging.Set_log_init(config.saveConfiguration(),true); // configuration sauvegardée   
       }
    if (request->hasParam("mqttuser")) { request->getParam("mqttuser")->value().toCharArray(configmqtt.username,50);  }
    if (request->hasParam("mqttport")) { config.mqttport = request->getParam("mqttport")->value().toInt();}
@@ -353,7 +356,7 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
    if (request->hasParam(PARAM_INPUT_servermode)) { inputMessage = request->getParam( PARAM_INPUT_servermode)->value();
                                             getServermode(inputMessage);
                                             request->send(200, "text/html", getconfig().c_str());
-                                            logging.Set_log_init("Configuration saved\r\n",true); // configuration sauvegardée
+                                            logging.Set_log_init(config.saveConfiguration(),true); // configuration sauvegardée
                                             logging.Set_log_init(configmqtt.savemqtt(),true); // configuration sauvegardée
                                         }
 
