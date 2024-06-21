@@ -3,6 +3,7 @@
 
 
 #include "WiFiClientSecure.h"
+#include <ESPmDNS.h>
 
   #include <driver/adc.h>
   #include "config/config.h"
@@ -38,6 +39,7 @@
   #include "tasks/Serial_task.h"
   #include "tasks/send-mqtt.h"
   #include "tasks/watchdog_memory.h"
+  #include "tasks/mDNS.h"
   
   #include "functions/spiffsFunctions.h"
   #include "functions/Mqtt_http_Functions.h"
@@ -287,6 +289,19 @@ void setup()
  
   connect_to_wifi();
 
+  // Initialize mDNS
+  //config.say_my_name)
+  if (!MDNS.begin(gDisplayValues.pvname)) {   
+    Serial.println("Error setting up MDNS responder!");
+    while(1) {
+      delay(1000);
+    }
+  }
+  Serial.println("mDNS responder started");
+  Serial.println(gDisplayValues.pvname);
+  logging.Set_log_init("mDNS responder started\r\n",true);
+  logging.Set_log_init(gDisplayValues.pvname + ".local\r\n",true);
+
 #if OLED_ON == true
     Serial.println(OLEDSTART);
     // Initialising OLED
@@ -372,6 +387,16 @@ ntpinit();
     xTaskCreate(
       watchdog_memory,
       "watchdog_memory",  // Task name
+      6000,            // Stack size (bytes)
+      NULL,             // Parameter
+      5,                // Task priority
+      NULL          // Task handle
+    );  
+
+        // task de recherche dimmer 
+    xTaskCreate(
+      mdns_discovery,
+      "mdns_discovery",  // Task name
       6000,            // Stack size (bytes)
       NULL,             // Parameter
       5,                // Task priority

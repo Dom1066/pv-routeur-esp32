@@ -278,7 +278,7 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
 	 if (request->hasParam(PARAM_INPUT_2)) { config.cycle = request->getParam(PARAM_INPUT_2)->value().toInt(); }
 	 if (request->hasParam(PARAM_INPUT_3)) { config.readtime = request->getParam(PARAM_INPUT_3)->value().toInt();}
 	 if (request->hasParam(PARAM_INPUT_4)) { config.cosphi = request->getParam(PARAM_INPUT_4)->value().toInt();  }
-   if (request->hasParam(PARAM_INPUT_dimmer)) { request->getParam(PARAM_INPUT_dimmer)->value().toCharArray(config.dimmer,16);  }
+   if (request->hasParam(PARAM_INPUT_dimmer)) { request->getParam(PARAM_INPUT_dimmer)->value().toCharArray(config.dimmer,64);  }
    if (request->hasParam(PARAM_INPUT_server)) { request->getParam(PARAM_INPUT_server)->value().toCharArray(config.hostname,16);  }
    if (request->hasParam(PARAM_INPUT_delta)) { config.delta = request->getParam(PARAM_INPUT_delta)->value().toInt(); }
    if (request->hasParam(PARAM_INPUT_deltaneg)) { config.deltaneg = request->getParam(PARAM_INPUT_deltaneg)->value().toInt(); }
@@ -297,6 +297,7 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
    if (request->hasParam("screentime")) { config.ScreenTime = request->getParam("screentime")->value().toInt(); } 
    if (request->hasParam("voltage")) { config.voltage = request->getParam("voltage")->value().toInt();}
    if (request->hasParam("offset")) { config.offset = request->getParam("offset")->value().toInt();}
+   if (request->hasParam("trigger")) { config.trigger = request->getParam("trigger")->value().toInt();}
    
    /// @brief  wifi
    bool wifimodif=false ; 
