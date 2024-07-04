@@ -107,7 +107,7 @@ String getState() {
  
   const String fs_update = String("<br>!! FS pas à jour !!") ;
   const String pvname = String("PV ROUTER ") + WiFi.macAddress().substring(12,14)+ WiFi.macAddress().substring(15,17);
-  DynamicJsonDocument doc(256);
+  JsonDocument doc;
   doc["state"] = state;
   doc["watt"] = int(gDisplayValues.watt);
   doc["dimmer"] = gDisplayValues.puissance_route;
@@ -120,6 +120,8 @@ String getState() {
   doc["dallas"] = dallas.lost;  //perte de la data dallas
   doc["minuteur"] = programme.run; 
   doc[ "security" ] = dallas.security;
+  doc["relay1"]   = digitalRead(RELAY1);
+  doc["relay2"]   = digitalRead(RELAY2);
 
   state=""; 
   serializeJson(doc, state);
@@ -134,7 +136,7 @@ String getStateFull() {
   const String fs_update = String("<br>!! FS pas à jour !!") ;
   const String pvname = String("PV ROUTER ") + WiFi.macAddress().substring(12,14)+ WiFi.macAddress().substring(15,17);
 
-  DynamicJsonDocument doc(512);
+  JsonDocument doc;
   doc["state"] = state;
   doc["gDisplayValues.watt"] = int(gDisplayValues.watt);
   doc["unified_dimmer.get_power"]= unified_dimmer.get_power();
@@ -165,25 +167,26 @@ String stringbool(bool mybool){
   return String(truefalse);
   }
 
-String getServermode(String Servermode) {
-  if ( Servermode == "screen" ) {  gDisplayValues.screenstate = !gDisplayValues.screenstate; }
-  if ( Servermode == "Jeedom" ) {   config.UseJeedom = !config.UseJeedom;}
-  if ( Servermode == "Autonome" ) {   config.autonome = !config.autonome; }
-  if ( Servermode == "Dimmer local" ) {   
+bool getServermode(String Servermode) {
+  if ( Servermode == "screen" ) {  gDisplayValues.screenstate = !gDisplayValues.screenstate; return true;}
+  if ( Servermode == "Jeedom" ) {   config.UseJeedom = !config.UseJeedom; return true;}
+  if ( Servermode == "Autonome" ) {   config.autonome = !config.autonome; return true;}
+  if ( Servermode == "dimmerlocal" ) {   
                     config.dimmerlocal = !config.dimmerlocal;  
                     //dimmer1.setPower(0);
                     unified_dimmer.set_power(0);
-                    
-  }
-  if ( Servermode == "MQTT" ) {   config.mqtt = !config.mqtt; }
-  if ( Servermode == "polarité" ) {   config.polarity = !config.polarity; config.sauve_polarity();}
-  if ( Servermode == "envoy" ) {   configmodule.enphase_present = !configmodule.enphase_present; }
-  if ( Servermode == "fronius" ) {   configmodule.Fronius_present = !configmodule.Fronius_present; }
-  if ( Servermode == "TRI" ) {   config.Shelly_tri = !config.Shelly_tri; }
+                    return true;
+                    }
+  if ( Servermode == "MQTT" ) {   config.mqtt = !config.mqtt; return true;}
+  if ( Servermode == "polarité" ) {   config.polarity = !config.polarity; config.sauve_polarity(); return true;}
+  if ( Servermode == "envoy" ) {   configmodule.enphase_present = !configmodule.enphase_present; return true;}
+  if ( Servermode == "fronius" ) {   configmodule.Fronius_present = !configmodule.Fronius_present; return true;}
+  if ( Servermode == "TRI" ) {   config.Shelly_tri = !config.Shelly_tri; return true;}
 
   #ifndef LIGHT_FIRMWARE
     if ( Servermode == "HA" ) {   configmqtt.HA = !configmqtt.HA; 
                       if (configmqtt.HA) init_HA_sensor(); 
+                      return true;
                       }
   #endif
   
@@ -193,10 +196,11 @@ String getServermode(String Servermode) {
               if (config.flip) display.setRotation(3);
               else display.setRotation(1);
               #endif
+              return true;
               }
-  
+ 
 
-return String(Servermode);
+return false;
 }
 //***********************************
 String getSigma() {
@@ -217,7 +221,7 @@ String getpuissance() {
 //***********************************
 String getconfig() {
   String configweb; 
-  DynamicJsonDocument doc(512);
+  JsonDocument doc;
   doc["Fusible"] = config.num_fuse;
   doc["version"] = String(VERSION);
   doc["delta"] = config.delta;
@@ -240,8 +244,7 @@ String getconfig() {
   doc["voltage"] = config.voltage;
   doc["offset"] = config.offset;
   doc["flip"] = config.flip;
-  //doc["relaystart"] = config.relayon;
-  //doc["relaystop"] = config.relayoff;
+
   doc["SCT_13"] = config.SCT_13;
   doc["trigger"] = config.trigger;
   
@@ -268,7 +271,7 @@ String getchart() {
 //***********************************
 String getwifi() {
   String retour ;
-  DynamicJsonDocument doc(256);
+  JsonDocument doc;
   doc["ssid"] = configwifi.SID;
   doc["password"] = SECURITEPASS;
   serializeJson(doc, retour);
@@ -277,7 +280,7 @@ String getwifi() {
 
 String getmqtt() {
   String retour; 
-  DynamicJsonDocument doc(512);
+  JsonDocument doc;
   doc["server"] = config.mqttserver;
   doc["topic"] = config.Publish;
   doc["user"] = configmqtt.username;

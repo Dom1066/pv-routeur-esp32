@@ -13,6 +13,8 @@ extern Configmodule configmodule;
 extern Configwifi configwifi; 
 extern Logs logging;
 extern Programme programme; 
+extern Programme programme_relay1; 
+extern Programme programme_relay2; 
 extern Memory task_mem; 
 
 
@@ -42,7 +44,7 @@ void compress_html(AsyncWebServerRequest *request,String filefs , String format 
 }
 
 void serveur_response(AsyncWebServerRequest *request, String response) {
-  request->send_P(200, "text/plain", response.c_str());
+  request->send(200, "text/plain", response.c_str());
 }
 
 
@@ -55,7 +57,7 @@ if (AP) {
     if(SPIFFS.exists("/index.html.gz")){
       compress_html(request,"/index-ap.html.gz", "text/html");
     }
-    else {request->send_P(200, "text/html", "<html><body>Filesystem is not present. <a href='https://ota.apper-solaire.org/firmware/spiffs-ttgo.bin'>download it here</a> <br>and after  <a href='/update'>upload on the ESP here </a></body></html>" ); }
+    else {request->send(200, "text/html", "<html><body>Filesystem is not present. <a href='https://ota.apper-solaire.org/firmware/spiffs-ttgo.bin'>download it here</a> <br>and after  <a href='/update'>upload on the ESP here </a></body></html>" ); }
   });
 
   server.on("/config.html", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -104,38 +106,16 @@ else {
 }
 
 
-  server.on("/all.min.css",  HTTP_GET, [](AsyncWebServerRequest *request){
-      compress_html(request,"/all.min.css.gz", "text/css");
-  });
+  server.serveStatic("/all.min.css", SPIFFS, "/all.min.css");
+  server.serveStatic("/jquery.min.js", SPIFFS, "/jquery.min.js");
+  server.serveStatic("/bootstrap.bundle.min.js", SPIFFS, "/bootstrap.bundle.min.js");
+  server.serveStatic("/bootstrap.bundle.min.js.map", SPIFFS, "/bootstrap.bundle.min.js.map");
+  server.serveStatic("/fa-solid-900.woff2", SPIFFS, "/fa-solid-900.woff2");
+  server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
+  server.serveStatic("/sb-admin-2.min.css", SPIFFS, "/sb-admin-2.min.css");
+  server.serveStatic("/sb-admin-2.js", SPIFFS, "/sb-admin-2.js");
 
-server.on("/jquery.min.js",  HTTP_GET, [](AsyncWebServerRequest *request){
-      compress_html(request,"/jquery.min.js.gz", "text/css");
-  });
-
-server.on("/bootstrap.bundle.min.js",  HTTP_GET, [](AsyncWebServerRequest *request){
-      compress_html(request,"/bootstrap.bundle.min.js.gz", "text/css");
-  });
-
-server.on("/bootstrap.bundle.min.js.map",  HTTP_GET, [](AsyncWebServerRequest *request){
-      compress_html(request,"/bootstrap.bundle.min.js.map.gz", "text/css");
-  });
-
-server.on("/favicon.ico",  HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/favicon.ico", "image/png");
-  });
-
-server.on("/fa-solid-900.woff2", HTTP_GET, [](AsyncWebServerRequest *request){
-      compress_html(request, "/fa-solid-900.woff2.gz", "text/css");
-  });
   
-server.on("/sb-admin-2.js", HTTP_GET, [](AsyncWebServerRequest *request){
-      compress_html(request, "/sb-admin-2.js.gz", "text/javascript");
-  });
-
-server.on("/sb-admin-2.min.css", HTTP_GET, [](AsyncWebServerRequest *request){
-      compress_html(request, "/sb-admin-2.min.css.gz", "text/css");
-  });
-
 server.on("/mqtt.json", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/mqtt.json", "text/css");
   });
@@ -164,20 +144,20 @@ server.on("/minuteur.html",  HTTP_GET, [](AsyncWebServerRequest *request){
 /// Appel de fonction 
 
   server.on("/chart.json", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "application/json", getchart().c_str());
+    request->send(200, "application/json", getchart().c_str());
   }); 
 
   server.on("/state", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "application/json", getState().c_str());
+    request->send(200, "application/json", getState().c_str());
   });
 
   server.on("/statefull", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "application/json", getStateFull().c_str());
+    request->send(200, "application/json", getStateFull().c_str());
   });
 
   
   server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "application/json", getconfig().c_str());
+    request->send(200, "application/json", getconfig().c_str());
 
   });
 
@@ -354,11 +334,12 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
    if (request->hasParam(PARAM_INPUT_reset)) {Serial.println("Resetting ESP");  ESP.restart();}
 
    //// for check boxs in web pages  
-   if (request->hasParam(PARAM_INPUT_servermode)) { inputMessage = request->getParam( PARAM_INPUT_servermode)->value();
-                                            getServermode(inputMessage);
-                                            request->send(200, "text/html", getconfig().c_str());
+   if (request->hasParam("servermode")) { inputMessage = request->getParam( PARAM_INPUT_servermode)->value();
+                                            if (getServermode(inputMessage)) {
                                             logging.Set_log_init(config.saveConfiguration(),true); // configuration sauvegardée
                                             logging.Set_log_init(configmqtt.savemqtt(),true); // configuration sauvegardée
+                                            }
+                                            request->send(200, "text/html", getconfig().c_str());
                                         }
 
     /// relays : 0 : off , 1 : on , other : switch 
@@ -380,8 +361,7 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
         itoa( relaystate, str, 10 );
         request->send(200, "text/html", str );
     }
-    //if (request->hasParam("relaystart")) { config.relayon = request->getParam("relaystart")->value().toInt();}
-    //if (request->hasParam("relaystop")) { config.relayoff = request->getParam("relaystop")->value().toInt();}
+
     if (request->hasParam("SCT_13")) { config.SCT_13 = request->getParam("SCT_13")->value().toInt();  
         /// la valeur de la sonde doit être entre 20 et 100 ( )
         if (config.SCT_13 < 20) config.SCT_13 = 20;
@@ -397,6 +377,8 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
 
   server.on("/getminiteur", HTTP_ANY, [] (AsyncWebServerRequest *request) {
     if (request->hasParam("dimmer")) { request->send(200, "application/json",  getMinuteur(programme));  }
+    if (request->hasParam("relay1")) { request->send(200, "application/json",  getMinuteur(programme_relay1)); }
+    if (request->hasParam("relay2")) { request->send(200, "application/json",  getMinuteur(programme_relay2)); }
     else { request->send(200, "application/json",  getMinuteur());  }
   });
 
@@ -407,9 +389,24 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
               if (request->hasParam("heure_demarrage")) { request->getParam("heure_demarrage")->value().toCharArray(programme.heure_demarrage,6);  }
               if (request->hasParam("heure_arret")) { request->getParam("heure_arret")->value().toCharArray(programme.heure_arret,6);  }
               if (request->hasParam("temperature")) { programme.temperature = request->getParam("temperature")->value().toInt();   }
+              if (request->hasParam("puissance")) { programme.puissance = request->getParam("puissance")->value().toInt(); }
               programme.saveProgramme();
         request->send(200, "application/json",  getMinuteur(programme));  
       }
+      if (request->hasParam("relay1")) { 
+            if (request->hasParam("heure_demarrage")) { request->getParam("heure_demarrage")->value().toCharArray(programme_relay1.heure_demarrage,6);  }
+            if (request->hasParam("heure_arret")) { request->getParam("heure_arret")->value().toCharArray(programme_relay1.heure_arret,6);  }
+            if (request->hasParam("temperature")) { programme_relay1.temperature = request->getParam("temperature")->value().toInt();  programme_relay1.saveProgramme(); }
+      request->send(200, "application/json",  getMinuteur(programme_relay1)); 
+      }
+      if (request->hasParam("relay2")) { 
+              if (request->hasParam("heure_demarrage")) { request->getParam("heure_demarrage")->value().toCharArray(programme_relay2.heure_demarrage,6);  }
+              if (request->hasParam("heure_arret")) { request->getParam("heure_arret")->value().toCharArray(programme_relay2.heure_arret,6);  }
+              if (request->hasParam("temperature")) { programme_relay2.temperature = request->getParam("temperature")->value().toInt();  programme_relay2.saveProgramme(); }
+        request->send(200, "application/json",  getMinuteur(programme_relay2)); 
+      }
+      else { request->send(200, "application/json",  getMinuteur()); }
+
   });
 
   server.on("/getmemory", HTTP_ANY, [] (AsyncWebServerRequest *request) {
@@ -419,13 +416,14 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
 }
 
 String getMinuteur(const Programme& minuteur) {
-    DynamicJsonDocument doc(128);
+    JsonDocument doc;
     getLocalTime(&timeinfo);
     doc["heure_demarrage"] = minuteur.heure_demarrage;
     doc["heure_arret"] = minuteur.heure_arret;
     doc["temperature"] = minuteur.temperature;
     doc["heure"] = timeinfo.tm_hour;
-    doc["minute"] = timeinfo.tm_min;;
+    doc["minute"] = timeinfo.tm_min;
+    doc["puissance"] = minuteur.puissance;
 
     String retour;
     serializeJson(doc, retour);
@@ -433,7 +431,7 @@ String getMinuteur(const Programme& minuteur) {
 }
 
 String getMinuteur() {
-    DynamicJsonDocument doc(128);
+    JsonDocument doc;
     getLocalTime(&timeinfo);
     doc["heure"] = timeinfo.tm_hour;
     doc["minute"] = timeinfo.tm_min;
@@ -444,7 +442,7 @@ String getMinuteur() {
 }
 
 String return_Memory() {
-    DynamicJsonDocument doc(512);
+    JsonDocument doc;
     doc["task_GetDImmerTemp"] = task_mem.task_GetDImmerTemp;
     doc["task_dallas_read"] = task_mem.task_dallas_read;
     doc["task_keepWiFiAlive2"] = task_mem.task_keepWiFiAlive2;

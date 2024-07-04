@@ -299,11 +299,6 @@ if ( !config.dimmerlocal && gDisplayValues.dimmer >= config.num_fuse) {
           }
         }
 
-        /// Relay
-
-       // if ( gDisplayValues.dimmer >= config.relayon ) {   digitalWrite(RELAY1, HIGH); }
-       // if ( gDisplayValues.dimmer <= config.relayoff ) {   digitalWrite(RELAY1, LOW ); }
-
     }
 
     else { dimmer_change( config.dimmer, config.IDXdimmer, gDisplayValues.dimmer, puissance_dispo ) ;  }
@@ -366,7 +361,7 @@ int dimmer_getState() {
     if (httpCode > 0) { //Check the returning code
       String payload = http.getString();   //Get the request response payload
 
-      DynamicJsonDocument doc(256);
+      JsonDocument doc;
       DeserializationError error = deserializeJson(doc, payload);
       if (error) {
         /// Modif RV - 20240221

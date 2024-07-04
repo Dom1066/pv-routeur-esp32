@@ -101,8 +101,6 @@ public:
   int voltage; 
   int offset; 
   bool flip;
-  //int relayon; 
-  //int relayoff;
   bool restart;
   char topic_Shelly[100];  // NOSONAR
   bool Shelly_tri;
@@ -154,7 +152,7 @@ public:
     // Allocate a temporary JsonDocument
     // Don't forget to change the capacity to match your requirements.
     // Use arduinojson.org/v6/assistant to compute the capacity.
-    DynamicJsonDocument doc(1024);
+    JsonDocument doc;
 
     // Deserialize the JSON document
     DeserializationError error = deserializeJson(doc, configFile);
@@ -211,8 +209,6 @@ public:
     localfuse = doc["localfuse"] | 20;
     voltage = doc["voltage"] | 233;
     offset = doc["offset"] | -10;
-    //relayoff = doc["relayoff"] | 95;
-    //relayon = doc["relayon"] | 100;
     SCT_13 = doc["SCT_13"] | 30;
     trigger = doc["trigger"] | 10;
     check_trigger();
@@ -264,7 +260,7 @@ public:
     // Allocate a temporary JsonDocument
     // Don't forget to change the capacity to match your requirements.
     // Use arduinojson.org/assistant to compute the capacity.
-    DynamicJsonDocument doc(1024);
+    JsonDocument doc;
 
     // Set the values in the document
     doc["hostname"] = hostname;
@@ -308,9 +304,7 @@ public:
     doc["voltage"] = voltage; 
     doc["offset"] = offset; 
     doc["flip"] = flip; 
-    
-    //doc["relayon"] = relayon; 
-    //doc["relayoff"] = relayoff; 
+
     doc["topic_Shelly"] = topic_Shelly; 
     doc["Shelly_tri"] = Shelly_tri;
     doc["SCT_13"] = SCT_13;
@@ -377,7 +371,7 @@ String loadmqtt() {
   // Allocate a temporary JsonDocument
   // Don't forget to change the capacity to match your requirements.
   // Use arduinojson.org/v6/assistant to compute the capacity.
-  DynamicJsonDocument doc(512);
+  JsonDocument doc;
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, configFile);
@@ -420,7 +414,7 @@ String savemqtt() {
   // Allocate a temporary JsonDocument
   // Don't forget to change the capacity to match your requirements.
   // Use arduinojson.org/assistant to compute the capacity.
-  DynamicJsonDocument doc(512);
+  JsonDocument doc;
 
   // Set the values in the document
   doc["MQTT_USER"] = username;

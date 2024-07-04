@@ -24,6 +24,7 @@ extern Config config;
 
 struct tm timeinfo;
 epoc actual_time;
+extern gestion_puissance unified_dimmer; 
 
 /// @brief ///////init du NTP 
 void ntpinit() {
@@ -43,19 +44,28 @@ struct Programme {
     bool run; 
     int heure;
     int minute;
+    
+    int seuil_start;
+    int seuil_stop;
+    int seuil_temperature;
+    int puissance=100;
 
-  private:char name_minuteur[12];  // NOSONAR
+  private:
+    bool security = false;
+    String name;
   
-  // setter name 
-  public:void Set_name(String setter) {strlcpy(name_minuteur, setter.c_str(), sizeof(name_minuteur)); }
+    /// setter pour le nom du programme
+    public:void set_name(String name) {
+      this->name = name;
+    }
 
 
   /// @brief sauvegarde
   /// @param programme_conf 
   public:void saveProgramme() {
-
-        DynamicJsonDocument doc(192);
-
+        const char * c_file = name.c_str();// NOSONAR
+        JsonDocument doc;
+        Serial.println(F("save programme"));
               ////vérification cohérence des données
         if (check_data(heure_demarrage)) {strcpy(heure_demarrage, "00:00"); }
         if (check_data(heure_arret)) {strcpy(heure_arret, "00:00"); }
@@ -64,9 +74,13 @@ struct Programme {
         doc["heure_demarrage"] = heure_demarrage;
         doc["heure_arret"] = heure_arret;
         doc["temperature"] = temperature;
+        doc["seuil_start"] = seuil_start;
+        doc["seuil_stop"] = seuil_stop;
+        doc["seuil_temperature"] = seuil_temperature;
+        doc["puissance"] = puissance;
         
           // Open file for writing
-        File configFile = SPIFFS.open(name_minuteur, "w");
+        File configFile = SPIFFS.open(c_file, "w");
         if (!configFile) {
           Serial.println(F("Failed to open config file for writing"));
           return;
@@ -85,12 +99,13 @@ struct Programme {
   
 
   public:bool loadProgramme() {
-        File configFile = SPIFFS.open(name_minuteur, "r");
+        const char * c_file = name.c_str();// NOSONAR
+        File configFile = SPIFFS.open(c_file, "r");
 
         // Allocate a temporary JsonDocument
         // Don't forget to change the capacity to match your requirements.
         // Use arduinojson.org/v6/assistant to compute the capacity.
-        DynamicJsonDocument doc(192);
+        JsonDocument doc;
 
         // Deserialize the JSON document
         DeserializationError error = deserializeJson(doc, configFile);
@@ -107,6 +122,11 @@ struct Programme {
                 doc["heure_arret"] | "", // <- source
                 sizeof(heure_arret));         // <- destination's capacity
         temperature = doc["temperature"] | 50 ; /// defaut à 50 °
+        seuil_start = doc["seuil_start"] | 0 ; /// defaut à 0 %°
+        seuil_stop = doc["seuil_stop"] | 0 ; /// defaut à sans arret %
+        seuil_temperature = doc["seuil_temperature"] | 0 ; /// defaut à 0 °
+        puissance = doc["puissance"] | 100 ; /// defaut à 100 %
+        
         configFile.close();
       return true;    
   }
@@ -219,6 +239,32 @@ public:bool stop_progr() {
   Serial.println("Erreur de lecture de l'heure");
   return true;
  }
+
+    /// démarrage si le seuil est atteint 
+  bool start_seuil() {
+    if ( unified_dimmer.get_power() >= seuil_start && gDisplayValues.temperature< seuil_temperature && seuil_start != seuil_stop) { 
+      return true;
+    }
+  return false; 
+  }
+
+  /// arrêt si le seuil est atteint
+  bool stop_seuil() {
+    if ( unified_dimmer.get_power() >= seuil_stop && seuil_start != seuil_stop && gDisplayValues.temperature> seuil_temperature) { 
+      return true;
+    }
+  return false;
+  }
+
+  /// arret si seuil temp est atteint
+  bool stop_seuil_temp() {
+    if ( gDisplayValues.temperature>= seuil_temperature && seuil_temperature != 0) { 
+      return true;
+    }
+  return false;
+  }
+
+
 
 };
 
