@@ -106,15 +106,15 @@ else {
 }
 
 
-  server.serveStatic("/all.min.css", SPIFFS, "/all.min.css");
-  server.serveStatic("/jquery.min.js", SPIFFS, "/jquery.min.js");
-  server.serveStatic("/bootstrap.bundle.min.js", SPIFFS, "/bootstrap.bundle.min.js");
-  server.serveStatic("/bootstrap.bundle.min.js.map", SPIFFS, "/bootstrap.bundle.min.js.map");
-  server.serveStatic("/fa-solid-900.woff2", SPIFFS, "/fa-solid-900.woff2");
-  server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
-  server.serveStatic("/sb-admin-2.min.css", SPIFFS, "/sb-admin-2.min.css");
-  server.serveStatic("/sb-admin-2.js", SPIFFS, "/sb-admin-2.js");
-
+  server.serveStatic("/all.min.css", SPIFFS, "/all.min.css").setCacheControl("max-age=31536000");
+  server.serveStatic("/jquery.min.js", SPIFFS, "/jquery.min.js").setCacheControl("max-age=31536000");
+  server.serveStatic("/bootstrap.bundle.min.js", SPIFFS, "/bootstrap.bundle.min.js").setCacheControl("max-age=31536000");
+  server.serveStatic("/bootstrap.bundle.min.js.map", SPIFFS, "/bootstrap.bundle.min.js.map").setCacheControl("max-age=31536000");
+  server.serveStatic("/fa-solid-900.woff2", SPIFFS, "/fa-solid-900.woff2").setCacheControl("max-age=31536000");
+  server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico").setCacheControl("max-age=31536000");
+  server.serveStatic("/sb-admin-2.min.css", SPIFFS, "/sb-admin-2.min.css").setCacheControl("max-age=31536000");
+  server.serveStatic("/sb-admin-2.js", SPIFFS, "/sb-admin-2.js").setCacheControl("max-age=31536000");
+  server.serveStatic("/log.html", SPIFFS, "/log.html").setCacheControl("max-age=31536000");
   
 server.on("/mqtt.json", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/mqtt.json", "text/css");
@@ -132,10 +132,6 @@ server.on("/enphase.json", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/enphase.json", "application/json");
   });
 
-server.on("/log.html", HTTP_ANY, [](AsyncWebServerRequest *request){
-      compress_html(request,"/log.html.gz", "text/html");
-  });
-
 server.on("/minuteur.html",  HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/minuteur.html", "text/html");
   });
@@ -149,6 +145,10 @@ server.on("/minuteur.html",  HTTP_GET, [](AsyncWebServerRequest *request){
 
   server.on("/state", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "application/json", getState().c_str());
+  });
+
+  server.on("/stateshort", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "application/json", getState_short().c_str());
   });
 
   server.on("/statefull", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -343,8 +343,8 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
 
     /// relays : 0 : off , 1 : on , other : switch 
     if (request->hasParam("relay1")) { int relay = request->getParam("relay1")->value().toInt(); 
-        if ( relay == 0 ) { digitalWrite(RELAY1 , LOW); }
-        else if ( relay == 1 ) { digitalWrite(RELAY1 , HIGH); } 
+        if ( relay == 0 ) { digitalWrite(RELAY1 , HIGH); } // correction bug de démarrage en GPIO 0
+        else if ( relay == 1 ) { digitalWrite(RELAY1 , LOW); } // correction bug de démarrage en GPIO 0
         else if (relay == 2) { digitalWrite(RELAY1, !digitalRead(RELAY1)); }
         int relaystate = digitalRead(RELAY1); 
         char str[8];// NOSONAR
@@ -376,8 +376,8 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
 
   server.on("/getminiteur", HTTP_ANY, [] (AsyncWebServerRequest *request) {
     if (request->hasParam("dimmer")) { request->send(200, "application/json",  getMinuteur(programme));  }
-    if (request->hasParam("relay1")) { request->send(200, "application/json",  getMinuteur(programme_relay1)); }
-    if (request->hasParam("relay2")) { request->send(200, "application/json",  getMinuteur(programme_relay2)); }
+    else if (request->hasParam("relay1")) { request->send(200, "application/json",  getMinuteur(programme_relay1)); }
+    else if (request->hasParam("relay2")) { request->send(200, "application/json",  getMinuteur(programme_relay2)); }
     else { request->send(200, "application/json",  getMinuteur());  }
   });
 
@@ -395,13 +395,15 @@ server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
       if (request->hasParam("relay1")) { 
             if (request->hasParam("heure_demarrage")) { request->getParam("heure_demarrage")->value().toCharArray(programme_relay1.heure_demarrage,6);  }
             if (request->hasParam("heure_arret")) { request->getParam("heure_arret")->value().toCharArray(programme_relay1.heure_arret,6);  }
-            if (request->hasParam("temperature")) { programme_relay1.temperature = request->getParam("temperature")->value().toInt();  programme_relay1.saveProgramme(); }
+            if (request->hasParam("temperature")) { programme_relay1.temperature = request->getParam("temperature")->value().toInt();  }
+            programme_relay1.saveProgramme(); 
       request->send(200, "application/json",  getMinuteur(programme_relay1)); 
       }
       if (request->hasParam("relay2")) { 
               if (request->hasParam("heure_demarrage")) { request->getParam("heure_demarrage")->value().toCharArray(programme_relay2.heure_demarrage,6);  }
               if (request->hasParam("heure_arret")) { request->getParam("heure_arret")->value().toCharArray(programme_relay2.heure_arret,6);  }
-              if (request->hasParam("temperature")) { programme_relay2.temperature = request->getParam("temperature")->value().toInt();  programme_relay2.saveProgramme(); }
+              if (request->hasParam("temperature")) { programme_relay2.temperature = request->getParam("temperature")->value().toInt();  }
+              programme_relay2.saveProgramme(); 
         request->send(200, "application/json",  getMinuteur(programme_relay2)); 
       }
       else { request->send(200, "application/json",  getMinuteur()); }

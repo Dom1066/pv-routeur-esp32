@@ -52,31 +52,32 @@ void loadlogs() {
   }
   configFile.close();
   
-  logging.Set_log_init("logs loaded\r\n",true);
+  logging.Set_log_init(logs_loaded,true);
    
 
 }
 
-bool test_fs_version() {
+bool test_fs_version(bool log = true) {
   // SPIFFS.begin() call is needed to use filesystem
   if (!SPIFFS.begin(true)) {
-    logging.Set_log_init("An Error has occurred while mounting SPIFFS\r\n");
+     if (log) { logging.Set_log_init(Fail_mount_FS); }
     return false;
   }
   // Open file for reading
   File file = SPIFFS.open("/version", "r");
   if (!file) {
-    logging.Set_log_init("Failed to open file for reading\r\n");
+     if (log) { logging.Set_log_init(FS_version_is_not_same); }
     return false;
   }
    // comparaison entre le contenu du fichier et la version du code FS_RELEASE
   String version = file.readStringUntil('\n');
   file.close();
   if (version.toInt() < FS_RELEASE ) {
-    logging.Set_log_init("FS version is not the same as code version please update FS\r\n");
+     if (log) { logging.Set_log_init(FS_version_is_not_same); }
     
     return false;
   }
+  if (log) {  logging.Set_log_init(FS_version_is_same); }
   return true;
 }
 #endif

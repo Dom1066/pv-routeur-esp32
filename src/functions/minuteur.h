@@ -65,7 +65,7 @@ struct Programme {
   public:void saveProgramme() {
         const char * c_file = name.c_str();// NOSONAR
         JsonDocument doc;
-        Serial.println(F("save programme"));
+        Serial.println("save programme " + name);
               ////vérification cohérence des données
         if (check_data(heure_demarrage)) {strcpy(heure_demarrage, "00:00"); }
         if (check_data(heure_arret)) {strcpy(heure_arret, "00:00"); }
@@ -110,16 +110,16 @@ struct Programme {
         // Deserialize the JSON document
         DeserializationError error = deserializeJson(doc, configFile);
         if (error) {
-          Serial.println(F("Failed to read minuterie config "));
+          Serial.println("Failed to read minuterie config " + name);
           return false;
         }
       
         strlcpy(heure_demarrage,                  // <- destination
-                doc["heure_demarrage"] | "", // <- source
+                doc["heure_demarrage"] | "00:00", // <- source
                 sizeof(heure_demarrage));         // <- destination's capacity
         
         strlcpy(heure_arret,                  // <- destination
-                doc["heure_arret"] | "", // <- source
+                doc["heure_arret"] | "00:00", // <- source
                 sizeof(heure_arret));         // <- destination's capacity
         temperature = doc["temperature"] | 50 ; /// defaut à 50 °
         seuil_start = doc["seuil_start"] | 0 ; /// defaut à 0 %°
@@ -134,7 +134,7 @@ struct Programme {
   void commande_run(){
           digitalWrite(COOLER, HIGH);
           run=true; 
-          logging.Set_log_init("minuteur: start\r\n",true);
+          logging.Set_log_init(Start_minuteur,true);
   }
 
    public:bool start_progr() {
@@ -201,7 +201,7 @@ public:bool stop_progr() {
   /// sécurité temp
   if ( gDisplayValues.temperature >= config.tmax  || gDisplayValues.temperature >= temperature ) { 
     digitalWrite(COOLER, LOW);
-    logging.Set_log_init("minuteur: stop temp\r\n",true);
+    logging.Set_log_init(Stop_minuteur_temp,true);
     run=false; 
 
      // protection flicking
@@ -215,7 +215,7 @@ public:bool stop_progr() {
   sscanf(heure_arret, "%d:%d", &heures, &minutes);
   if(getLocalTime( &timeinfo )) {
     if (heures == timeinfo.tm_hour && minutes == timeinfo.tm_min ) {
-        logging.Set_log_init("minuteur: stop \r\n",true);
+        logging.Set_log_init(Stop_minuteur,true);
         digitalWrite(COOLER, LOW);
         run=false; 
         return true; 

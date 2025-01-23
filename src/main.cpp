@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "driver/ledc.h"
-
+#include "langues/lang.h"
 
 #include "WiFiClientSecure.h"
 #include <ESPmDNS.h>
@@ -28,6 +28,7 @@
   #include "tasks/updateDisplay.h"
   #include "tasks/switchDisplay.h"
  
+  
   
   #include "tasks/wifi-connection.h"
   #include "tasks/measure-electricity.h"
@@ -78,11 +79,8 @@ int resolution = 10; // Résolution de 8 bits, 256 valeurs possibles
 //***********************************
 //************* Afficheur Oled
 //***********************************
-#ifdef  DEVKIT1
-// Oled
-#include "SSD1306Wire.h" /// Oled ( https://github.com/ThingPulse/esp8266-oled-ssd1306 ) 
-constexpr const int I2C_DISPLAY_ADDRESS = 0x3c;
-SSD1306Wire  display(0x3c, SDA, SCL); // pin 21 SDA - 22 SCL
+#ifdef  ESP32D1MINI_FIRMWARE
+ /// deja intégré dans display.h
 #endif
 
 #ifdef  TTGO
@@ -174,21 +172,26 @@ void setup()
   #endif
   Serial.println("\n================== " + String(VERSION) + " ==================");
   logging.Set_log_init("197}11}1");
-  logging.Set_log_init("#################  Restart reason  ###############\r\n");
+  logging.Set_log_init("#################  "+ String(Reason_for_reset) +"  ###############\r\n");
   esp_reset_reason_t reason = esp_reset_reason();
   logging.Set_log_init(String(reason).c_str());
-  logging.Set_log_init("\r\n#################  Starting System  ###############\r\n");
+  logging.Set_log_init("\r\n#################  "+ String(Starting_System)+ "  ###############\r\n");
   
   //démarrage file system
   Serial.println("start SPIFFS");
   test_fs_version();
   
-  logging.Set_log_init("Start Filesystem\r\n",true);
+  logging.Set_log_init(Start_filesystem,true);
   
   if (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS Initialization failed!");
     return;
   }
+
+    #ifdef  ESP32D1MINI_FIRMWARE
+    oled.init();
+    oled.wait_for_wifi(0);
+    #endif
 
   /// Program & FS size
     // size of the compiled program
@@ -243,7 +246,7 @@ void setup()
 
   if (configwifi.recup_wifi()){
      
-     logging.Set_log_init("Wifi config \r\n",true);
+     logging.Set_log_init(Loading_wifi_configuration,true);
        AP=false; 
   } 
   else {
@@ -281,40 +284,36 @@ void setup()
   adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_11);
   adc1_config_channel_atten(ADC1_CHANNEL_5, ADC_ATTEN_DB_11);
 
+  #ifdef TTGO
   pinMode(ADC_INPUT, INPUT);
-
+  #endif
   // déclaration switch
   pinMode(RELAY1, OUTPUT);
   pinMode(RELAY2, OUTPUT);
-  digitalWrite(RELAY1, LOW);
+  digitalWrite(RELAY1, HIGH); //correction bug de démarrage en GPIO 0
   digitalWrite(RELAY2, LOW);
 
 ///  WIFI INIT
- 
+      #ifdef  ESP32D1MINI_FIRMWARE
+      oled.wait_for_wifi(1);
+      #endif
   connect_to_wifi();
+      #ifdef  ESP32D1MINI_FIRMWARE
+      oled.wait_for_wifi(2);
+      #endif
+  // Initialize mDNS ( déclaration du routeur sur le réseau )
 
-  // Initialize mDNS
-  //config.say_my_name)
-  if (!MDNS.begin(gDisplayValues.pvname)) {   
-    Serial.println("Error setting up MDNS responder!");
-    while(1) {
-      delay(1000);
-    }
-  }
-  Serial.println("mDNS responder started");
+  mdns_hello(gDisplayValues.pvname);
+
+  Serial.println(mDNS_Responder_Started);
   Serial.println(gDisplayValues.pvname);
-  logging.Set_log_init("mDNS responder started\r\n",true);
+  logging.Set_log_init(mDNS_Responder_Started,true);
   logging.Set_log_init(gDisplayValues.pvname + ".local\r\n",true);
 
 #if OLED_ON == true
     Serial.println(OLEDSTART);
     // Initialising OLED
-    #ifdef  DEVKIT1
-      display.init();
-      display.flipScreenVertically();
-    
-      display.clear();
-    #endif
+
     
     #ifdef TTGO
 
@@ -358,15 +357,12 @@ ntpinit();
   Serial.println("Loading minuterie");
   programme.set_name("/dimmer");
   programme.loadProgramme();
-  programme.saveProgramme();
 
   programme_relay1.set_name("/relay1");
   programme_relay1.loadProgramme();
-  programme_relay1.saveProgramme();
 
   programme_relay2.set_name("/relay2");
   programme_relay2.loadProgramme();
-  programme_relay2.saveProgramme();
 
   // Initialize Dimmer State 
   gDisplayValues.dimmer = 0;
@@ -449,7 +445,14 @@ ntpinit();
   //       This is pinned to the same core as Arduino
   //       because it would otherwise corrupt the OLED
   // ----------------------------------------------------------------
-  #if OLED_ON == true 
+  #if OLED_ON == true
+      #ifdef  ESP32D1MINI_FIRMWARE
+      Serial.println("init oled 0.7'' ");
+      init_ui();
+      #endif
+  #endif
+
+#if OLED_ON == true 
   xTaskCreatePinnedToCore(
     updateDisplay,
     "UpdateDisplay",  // Task name
@@ -459,9 +462,7 @@ ntpinit();
     NULL,             // Task handle
     ARDUINO_RUNNING_CORE
   );  
-  #endif
-
-
+#endif
 
   if (dallas.detect) {
     // ----------------------------------------------------------------
@@ -482,8 +483,9 @@ ntpinit();
   // ----------------------------------------------------------------
   // Task: Update Dimmer power
   // ----------------------------------------------------------------
-  attachInterrupt(SWITCH, function_off_screen, FALLING);
-  attachInterrupt(BUTTON_LEFT, function_next_screen, FALLING);
+  #ifndef ESP32D1MINI_FIRMWARE
+    attachInterrupt(SWITCH, function_off_screen, FALLING);
+    attachInterrupt(BUTTON_LEFT, function_next_screen, FALLING);
 
   xTaskCreate( 
     switchDisplay,
@@ -493,8 +495,8 @@ ntpinit();
     2,                      // Task priority
     NULL                    // Task handle
   ); 
-  
   #endif
+#endif
 
 
 
@@ -584,11 +586,7 @@ ntpinit();
 
 #endif
 
-  #if OLED_ON == true
-    #ifdef  DEVKIT1
-      display.clear();
-    #endif
-  #endif
+
 
 
 
@@ -599,7 +597,7 @@ esp_register_shutdown_handler( handler_before_reset );
 logging.power=true; logging.sct=true; logging.sinus=true; 
 
 /// affichage de l'heure  GMT +1 dans la log
-logging.Set_log_init("-- fin du demarrage  \r\n",true);
+logging.Set_log_init(End_Start,true);
 
 savelogs(" -- fin du précédent reboot -- ");
 
@@ -693,7 +691,7 @@ if (config.dimmerlocal) {
     if (programme.run) { 
         //  minuteur en cours
         if (programme.stop_progr()) { 
-            //dimmer1.setPower(0); // plus forcément utile --> unified dimmer
+
             unified_dimmer.dimmer_off();
             unified_dimmer.set_power(0);
             dallas.security=true;
@@ -743,32 +741,27 @@ if (config.dimmerlocal) {
 
 if (programme_relay1.run) { 
       if (programme_relay1.stop_progr()) { 
-        logging.Set_log_init("stop minuteur relay1\r\n",true);
-        digitalWrite(RELAY1 , LOW);
-//        device_relay1.send(String(0));
-
+        logging.Set_log_init(Stop_minuteur_relay1,true);
+        digitalWrite(RELAY1 , HIGH); //correction bug de démarrage en GPIO 0
       }
  }
  else {
       if (programme_relay1.start_progr()){ 
-        logging.Set_log_init("start minuteur relay1\r\n",true);
-        digitalWrite(RELAY1 , HIGH);
-      //  device_relay1.send(String(1));
+        logging.Set_log_init(Start_minuteur_relay1,true);
+        digitalWrite(RELAY1 , LOW); //correction bug de démarrage en GPIO 0
       }
  }
 
  if (programme_relay2.run) { 
       if (programme_relay2.stop_progr()) { 
-        logging.Set_log_init("stop minuteur relay2\r\n",true);
+        logging.Set_log_init(Stop_minuteur_relay2,true);
         digitalWrite(RELAY2 , LOW);
-    //    device_relay2.send(String(0));
       }
  }
  else {
       if (programme_relay2.start_progr()){ 
-        logging.Set_log_init("start minuteur relay2\r\n",true);
+        logging.Set_log_init(Start_minuteur_relay2,true);
         digitalWrite(RELAY2 , HIGH);
-      //device_relay2.send(String(1));
       }
  }
 
@@ -778,20 +771,16 @@ if (!AP) {
     time_reboot();
 }
 
-
-
-  task_mem.task_loop = uxTaskGetStackHighWaterMark(NULL);
+  task_mem.task_loop = uxTaskGetStackHighWaterMark(nullptr);
   vTaskDelay(pdMS_TO_TICKS(10000));
 }
 
 /// @brief / end Loop function
 
 
-
 void connect_to_wifi() {
   ///// AP WIFI INIT 
    
-
   if (AP || strcmp(configwifi.SID,"AP") == 0 ) {
       APConnect(); 
       gDisplayValues.currentState = DEVICE_STATE::UP;
@@ -806,7 +795,7 @@ void connect_to_wifi() {
       WiFi.begin(configwifi.SID, configwifi.passwd); 
       int timeoutwifi=0;
       
-      logging.Set_log_init("Start Wifi Network ",true);
+      logging.Set_log_init(Start_Wifi_Network,true);
       logging.Set_log_init(configwifi.SID);
       logging.Set_log_init("\r\n");
       
@@ -817,9 +806,9 @@ void connect_to_wifi() {
 
         if (timeoutwifi > 40 ) {
               
-              logging.Set_log_init("timeout, go to AP mode \r\n",true);
+              logging.Set_log_init(timeout_AP_mode,true);
               
-              logging.Set_log_init("Wifi State :",true);
+              logging.Set_log_init(Wifi_State,true);
               logging.Set_log_init("",true);
               
               switch (WiFi.status()) {
@@ -848,18 +837,18 @@ void connect_to_wifi() {
         //// timeout --> AP MODE 
         if ( timeoutwifi > 40 ) {
               WiFi.disconnect(); 
-              serial_println("timeout, go to AP mode ");
+              serial_println(timeout_AP_mode);
               
               gDisplayValues.currentState = DEVICE_STATE::UP;
               APConnect(); 
         }
 
 
-      serial_println("WiFi connected");
-      logging.Set_log_init("Wifi connected\r\n",true);
+      serial_println(Wifi_connected);
+      logging.Set_log_init(Wifi_connected,true);
       serial_println("IP address: ");
       serial_println(WiFi.localIP());
-        serial_print("force du signal:");
+        serial_print(signal_level);
         serial_print(WiFi.RSSI());
         serial_println("dBm");
       gDisplayValues.currentState = DEVICE_STATE::UP;

@@ -4,8 +4,8 @@
 /**
  * Language 
  */
-#define LANG_FR true
-#define LANG_EN false
+//#define LANG_FR true
+//#define LANG_EN false
 
 #define CLEAN false
 #define NTP false
@@ -21,7 +21,7 @@
  */
 #define MQTT_USER ""
 #define MQTT_PASSWORD ""
-#define MQTT_INTERVAL 60
+constexpr size_t MQTT_INTERVAL=60;
 
 /**
  * Switch Screnn button and time on
@@ -34,7 +34,7 @@
 /**
  * Time between 2 mesure of dimmer temp
  */
-#define GETTEMPREFRESH 5
+constexpr size_t GETTEMPREFRESH=5;
 
 //#define configMAX_PRIORITIES 1024
 
@@ -49,7 +49,7 @@
  * ADC input pin that is used to read out the CT sensor
  */
 
-#ifdef  DEVKIT1
+#ifdef  ESP32D1MINI_FIRMWARE
 #define ADC_INPUT 34 // linky
 #define ADC_PORTEUSE 35 // porteuse
 #endif
@@ -111,13 +111,13 @@ bool discovery_temp = false;
  * the ESP goes into deep sleep for 30seconds to try and
  * recover.
  */
-#define WIFI_TIMEOUT 30000 // 20 seconds
+constexpr size_t WIFI_TIMEOUT=30000; // 20 seconds
 
 /**
  * How long should we wait after a failed WiFi connection
  * before trying to set one up again.
  */
-#define WIFI_RECOVER_TIME_MS 30000 // 20 seconds
+constexpr size_t WIFI_RECOVER_TIME_MS=30000;// 20 seconds
 
 /**
  * Dimensions of the OLED display attached to the ESP
@@ -138,17 +138,17 @@ bool discovery_temp = false;
 /**
  * Local measurements
  */
-#define LOCAL_MEASUREMENTS 30
+constexpr size_t LOCAL_MEASUREMENTS=30;
 #define FACTEURPUISSANCE 10.50
-#define COMPENSATION 100 ///  % d'asservissement pour l'envoie de puissance au dimmer.
+constexpr size_t COMPENSATION=100; ///  % d'asservissement pour l'envoie de puissance au dimmer.
 
 /**
  * Syncing time with an NTP server
  */
 #define NTP_TIME_SYNC_ENABLED true
 #define NTP_SERVER "europe.pool.ntp.org"
-#define NTP_OFFSET_SECONDS 3600
-#define NTP_UPDATE_INTERVAL_MS 3600000 /// synch de l'heure toute les heures
+constexpr size_t NTP_OFFSET_SECONDS=3600;
+constexpr size_t NTP_UPDATE_INTERVAL_MS=3600000; /// synch de l'heure toute les heures
 
 // Check which core Arduino is running on. This is done because updating the 
 // display only works from the Arduino core.
@@ -158,8 +158,8 @@ bool discovery_temp = false;
   //  #define ARDUINO_RUNNING_CORE 1
 #endif
 
-#define RELEASE "Version 20240708"
-constexpr const int FS_RELEASE= 20240704 ;
+#define RELEASE "Version 20250120"
+constexpr const int FS_RELEASE=20240704;
 
     #ifdef LIGHT_FIRMWARE
         #define VERSION "Light " RELEASE
@@ -181,7 +181,7 @@ bool AP=true;
 #define RELAY2 15
 
 /// taille max des logs stockée
-#define LOG_MAX_STRING_LENGTH 1500 
+constexpr size_t LOG_MAX_STRING_LENGTH=1500;
 
 
 #ifdef S3
@@ -209,21 +209,26 @@ bool AP=true;
 
 /// Configuration pour ESP32D1MINI sur carte dimmer + récupération Shelly
 #ifdef ESP32D1MINI_FIRMWARE
-
+      #undef outputPin
       #define outputPin  18 // PSM on board
+      #undef zerocross
       #define zerocross  19 // for boards with CHANGEBLE input pins // ZC on board
+      #undef COOLER
       #define COOLER 5 // Pin for COOLER. (switch on dimmer)
       #define outputPin2 22 // use JOTTA/SSR2 (SSR2) output for 2nd Robotdyn/Random SSR
       #define outputPin3 21  // (SSR3) use RELAY2/SSR3 output for 3rd Robotdyn/Random SSR ( for old boards )
 
 
-
+      #undef ONE_WIRE_BUS
       #define ONE_WIRE_BUS  23
       #define TEMPERATURE_PRECISION 10
       //#define TRIGGER 5   /// Trigger % for max temp protection. max temp configuration is in config.json
-   
-  #define OLED_ON false
+  
+  //#undef OLED_ON
+  //#define OLED_ON TRUE
+  #undef RELAY1
   #define RELAY1 17
+  #undef RELAY2
   #define RELAY2 26
 #endif
 

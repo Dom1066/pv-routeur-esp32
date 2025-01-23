@@ -51,13 +51,13 @@ void keepWiFiAlive(void * parameter){ // NOSONAR
         if(WiFi.status() != WL_CONNECTED){
             serial_println(F("[WIFI] FAILED"));
              
-            logging.Set_log_init("Wifi disconnected\r\n",true);
+            logging.Set_log_init(Wifi_disconnected,true);
             vTaskDelay(WIFI_RECOVER_TIME_MS / portTICK_PERIOD_MS);
         }
 
-        serial_print(F("[WIFI] Connected: "));
+        serial_print(F(Wifi_reconnected));
          
-        logging.Set_log_init("Wifi reconnected\r\n",true);
+        logging.Set_log_init(Wifi_reconnected,true);
         serial_println(WiFi.localIP());
         serial_print("force du signal:");
         serial_print(WiFi.RSSI());
@@ -80,7 +80,7 @@ void keepWiFiAlive2(void * parameter){
                 }
         
                 
-            task_mem.task_keepWiFiAlive2 = uxTaskGetStackHighWaterMark(NULL);
+            task_mem.task_keepWiFiAlive2 = uxTaskGetStackHighWaterMark(nullptr);
             vTaskDelay(pdMS_TO_TICKS(30000));
 
         }

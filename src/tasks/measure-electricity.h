@@ -46,6 +46,7 @@ void measureElectricity(void * parameter) // NOSONAR
       }
 
             /// SCT 013 
+      #ifndef ESP32D1MINI_FIRMWARE
       if (mode == 0 ) { 
                   injection2();
                   gDisplayValues.wattIsValid = true;
@@ -54,7 +55,7 @@ void measureElectricity(void * parameter) // NOSONAR
                         gDisplayValues.wattIsValid = false;
                         slowlog ++; 
                         if (slowlog == TEMPOLOG) {     
-                              logging.Set_log_init("--> No sinus, check 12AC power \r\n");
+                              logging.Set_log_init(no_sinus_check_power);
                               slowlog =0 ; 
                         }
 
@@ -64,6 +65,7 @@ void measureElectricity(void * parameter) // NOSONAR
                 
                   }
       }
+      #endif
 
       if (mode == 4 ) {
                         //// mode demo
@@ -147,7 +149,7 @@ void measureElectricity(void * parameter) // NOSONAR
 
 
 long end = millis();
-      task_mem.task_measure_electricity = uxTaskGetStackHighWaterMark(NULL);
+      task_mem.task_measure_electricity = uxTaskGetStackHighWaterMark(nullptr);
       // Schedule the task to run again in 1 second (while
       // taking into account how long measurement took) ///&& configmodule.pilote
       if (mode != 0 ) {
