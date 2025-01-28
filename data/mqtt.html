@@ -9,7 +9,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Pv router - Wifi Configuration</title>
+  <title>Pv routeur - Configuration MQTT</title>
 
   <!-- Custom fonts for this template-->
  <link href="all.min.css" rel="stylesheet" type="text/css"> 
@@ -34,7 +34,7 @@
         <div class="sidebar-brand-icon rotate-n-15">
           <i class="fas fa-laugh-wink"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">Pv router</div>
+        <div class="sidebar-brand-text mx-3" id="name">Pv routeur</div>
       </a>
 
       <!-- Divider -->
@@ -44,9 +44,13 @@
       <li class="nav-item active">
         <a class="nav-link" href="/">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Dashboard</span><br>
-		<span id="version"></span></a>
-		  
+          <span>Tableau de bord</span><br>
+          <i class="fas fa-fw fa-code-branch"></i>
+		<span id="version">Version </span><br>
+		<br>
+		<i class="fa fa-wifi"></i>
+    <span id="RSSI">Signal WiFi: </span>
+</a> 
       </li>
 
 
@@ -149,7 +153,7 @@
 
               <div class="card position-relative">
                 <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Configuration</h6>
+                  <h6 class="m-0 font-weight-bold text-primary">Paramètres</h6>
 				  <span id="saveform"></span>
                 </div>
 
@@ -173,7 +177,7 @@
             </div>
 
             <div class="form-group">
-              Serveur  :<input type="text" class="form-control form-control-user" id="port" placeholder="%PORT%">
+              Port  :<input type="text" class="form-control form-control-user" id="port" placeholder="%PORT%">
             </div>
 
             <div class="form-group">
@@ -181,11 +185,11 @@
             </div>
 
             <div class="form-group">
-              User  :<input type="text" class="form-control form-control-user" id="user" placeholder="%USER%">
+              Identifiant  :<input type="text" class="form-control form-control-user" id="user" placeholder="%USER%">
             </div>
 
             <div class="form-group">
-              Password :<input type="password" class="form-control form-control-user" id="password" placeholder="%PASSWORD%">
+              Mot de passe :<input type="password" class="form-control form-control-user" id="password" placeholder="%PASSWORD%">
             </div>
 
 
@@ -199,13 +203,13 @@
 
                 <div class="form-group row">
                     <div class="col-sm-4">
-                            IDX Grid Power: <input type="number"  step="1" class="form-control form-control-user" id="IDX" placeholder="%IDX%">
+                            IDX Puissance réseau: <input type="number"  step="1" class="form-control form-control-user" id="IDX" placeholder="%IDX%">
                     </div>
                     <div class="col-sm-4">
-                            IDX Routed Power: <input type="number" step="1" class="form-control form-control-user" id="IDXDIMMER" placeholder="%IDXDIMMER%">
+                            IDX Puissance routée: <input type="number" step="1" class="form-control form-control-user" id="IDXDIMMER" placeholder="%IDXDIMMER%">
                     </div>
                     <div class="col-sm-4">
-                      IDX Temperature: <input type="number" step="1" class="form-control form-control-user" id="IDXDALLAS" placeholder="%IDXDALLAS%">
+                      IDX Température: <input type="number" step="1" class="form-control form-control-user" id="IDXDALLAS" placeholder="%IDXDALLAS%">
                     </div>
                 </div>
               </div>
@@ -245,7 +249,7 @@
                   </div>
                   <div class="col-sm-3">
                     <div class="custom-control custom-checkbox small">
-                      <a data-toggle="popover" title="Aide" data-bs-content="Cochez si vous utilisez un Shelly 3EM ( Triphasé )">Mono / Triphasé (Beta) ℹ</a>
+                      <a data-toggle="popover" title="Aide" data-bs-content="Cochez si vous utilisez un Shelly 3EM ( Triphasé )">Mono / Triphasé (Bêta) ℹ</a>
                       <br>
                       <input type="checkbox" class="custom-control-input" id="TRI" onchange="sendservermode('TRI');">
                       <label class="custom-control-label" for="TRI" >TRI</label>
@@ -292,6 +296,23 @@ function save () {
 
 
 }
+
+
+      //<!-- rafraichissement valeurs -->
+      setInterval(function refreshsend( ) {
+        $.getJSON('/state', function(data) {
+          // Récupérer les données du JSON
+            var version = data.version;
+            var rssi = data.RSSI;
+			var name = data.name;
+          document.getElementById("version").innerHTML = version;
+          document.getElementById("RSSI").innerHTML = 'Signal WiFi: ' + rssi  + ' dBm';
+		  document.getElementById("name").innerHTML = name  ;
+          });
+          }, 5000);
+
+
+
 
 function sendservermode (mode) {
 

@@ -9,10 +9,10 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Pv router - Dashboard</title>
+  <title>Pv routeur - Tableau de bord</title>
 
   <!-- Custom fonts for this template-->
- <link href="/all.min.css" rel="stylesheet" type="text/css"> 
+  <link href="/all.min.css" rel="stylesheet" type="text/css"> 
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
   <!-- Custom styles for this template-->
@@ -33,7 +33,7 @@
         <div class="sidebar-brand-icon rotate-n-15">
           <i class="fas fa-laugh-wink"></i>
         </div>
-        <div class="sidebar-brand-text mx-3" id="name">Pv router</div>
+        <div class="sidebar-brand-text mx-3" id="name">Pv routeur</div>
       </a>
 
       <!-- Divider -->
@@ -43,11 +43,17 @@
       <li class="nav-item active">
         <a class="nav-link" href="/">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Dashboard</span><br>
-		      <span id="version">Version: </span><br>
-          <span id="RSSI">RSSI : </span>
-        </a> 
+          <span>Tableau de bord</span><br>
+          <i class="fas fa-fw fa-code-branch"></i>
+		<span id="version">Version </span><br>
+		<br>
+		<i class="fa fa-wifi"></i>
+    <span id="RSSI">Signal WiFi: </span>
+</a> 
+		  
       </li>
+
+
 
       <!-- Divider -->
       <hr class="sidebar-divider">
@@ -114,7 +120,7 @@
 
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+            <h1 class="h3 mb-0 text-gray-800">Tableau de bord</h1>
            
           </div>
 
@@ -127,7 +133,7 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Réseau</div>
+                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">etat</div>
                       <div class="h5 mb-0 font-weight-bold text-gray-800"><span id="state">0</span></div>
                     </div>
                     <div class="col-auto">
@@ -144,11 +150,11 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Wattmètre</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800"><span id="sigma">0</span></div>
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">wattmètre</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800"><span id="sigma">0</span> W</div>
                     </div>
                     <div class="col-auto">
-                      <i class="fas fa-plug fa-2x text-gray-300"></i>
+                      <i class="fas fa-bolt fa-2x text-gray-300"></i>
                     </div>
                   </div>
                 </div>
@@ -162,8 +168,8 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Switch Screen</div>
-                      <button type="button" class="btn btn-primary btn-user btn-block" id="screen" onclick="sendservermode('screen');" >ON/OFF Oled </button>
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">ecran</div>
+                      <button type="button" class="btn btn-primary btn-user btn-block" id="screen" onclick="sendservermode('screen');" >ON/OFF écran </button>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-display fa-2x text-gray-300"></i>
@@ -178,8 +184,6 @@
 
           <!-- Content Row -->
 
-
-
           <div class="row">
 
             <!-- Area Chart -->
@@ -187,9 +191,9 @@
       <div class="card shadow mb-4">
                 <!-- Card Header - Dropdown -->
 				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold text-primary">Réseau</h6>
+          <h6 class="m-0 font-weight-bold text-primary">Etat</h6>
 				</div>
-				<div class="card-body">
+				<div class="card-body d-flex flex-row align-items-center justify-content-center">
 					<div id='curve_chart2' style=' width: auto; height: 200px;'>
 										
 					</div>
@@ -201,9 +205,9 @@
       <div class="card shadow mb-4">
                 <!-- Card Header - Dropdown -->
 				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold text-primary">Puissance Routée</h6>
+          <h6 class="m-0 font-weight-bold text-primary">Puissance routée</h6>
 				</div>
-				<div class="card-body">
+				<div class="card-body d-flex flex-row align-items-center justify-content-center">
 					<div id='curve_power' style=' width: auto; height: 200px;'>
 										
 					</div>
@@ -215,35 +219,15 @@
       <div class="card shadow mb-4">
                 <!-- Card Header - Dropdown -->
 				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold text-primary">Température Dallas</h6>
+          <h6 class="m-0 font-weight-bold text-primary">Température cumulus</h6>
 				</div>
-				<div class="card-body">
+				<div class="card-body d-flex flex-row align-items-center justify-content-center">
 					<div id='curve_temp' style=' width: auto; height: 200px;'>
 										
 					</div>
 				</div>
 			</div>
 		</div>
-  </div>
-    <div class="row">
-
-      <!-- Earnings (Monthly) Card Example -->
-          <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card shadow mb-4">
-                <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Etats</h6>
-                </div>
-                <div class="card-body">
-                <b>Etat Minuteur : </b><h4 id="minuteur">N/A</h4>
-                <b>Etat Dallas Locale: </b><h4 id="dallas">N/A</h4>
-                <b>Etat Dallas T°max: </b><h4 id="securite">N/A</h4>
-                <b>Etat Relais 1 : </b><h4 id="relais 1">N/A</h4>
-                <b>Etat Relais 2 : </b><h4 id="relais 2">N/A</h4>
-                </div>
-            </div>
-          </div>
-     </div> 
 			
 		<div class="col-xl-12 col-lg-7">
             <div class="card shadow mb-4">
@@ -272,54 +256,46 @@
 				  function drawChart() {    
 
 				var optionsGauge = {           
-          redFrom: -100, 
-          redTo: -25,
-           
-          yellowFrom: 50, 
-          yellowTo: 400, 
-           
-          greenFrom: -50, 
-          greenTo: 50, 
-		  	  
-          minorTicks: 4,
-		  
-          min: -100, 
-          max: 400, 
+           redFrom: -85, redTo: 0, redColor: '#01DF3A',         
+          greenFrom: -400, greenTo: 400, greenColor: '#FF0000',
+          yellowFrom: -135, yellowTo: 50,
+          minorTicks: 4, majorTicks: ['-400','','0','','400'],
+          max: 400, min: -400,
  
         };
        
 	   
 	      var optionsGaugepower = {           
-          redFrom: 0, 
-          redTo: 250,
+          redFrom: 1500, 
+          redTo: 1600, redColor: '#FF0000',
            
-          yellowFrom: 250, 
-          yellowTo: 500, 
+          yellowFrom: 900, 
+          yellowTo: 1500, 
            
-          greenFrom: 500, 
-          greenTo: 1500, 
+          greenFrom: 0, 
+          greenTo: 900, greenColor: '#01DF3A',
 		  	  
-          minorTicks: 5,
+          minorTicks: 4,
 		  
           min: 0, 
-          max: 1500, 
+          max: 1600, 
           
         };
 				  
         var optionsGaugetemp = {           
-          redFrom: 75, 
-          redTo: 100,
+          redFrom: 60, 
+          redTo: 70, redColor: '#FF0000',
            
-          yellowFrom: 0, 
-          yellowTo: 40, 
+          yellowFrom: 20, 
+          yellowTo: 30, yellowColor: '#2DA4FF',
            
-          greenFrom: 40, 
-          greenTo: 75, 
+          greenFrom: 30, 
+          greenTo: 60, greenColor: '#01DF3A',
 		  	  
-          minorTicks: 5,
+          minorTicks: 5, majorTicks: ['20','30','40','50','60','70'],
 		  
-          min: 0, 
-          max: 90, 
+          min: 20, 
+          max: 70, 
           
         }; 			  
 				
@@ -367,9 +343,11 @@
 
 	  setInterval(function ( ) {
 
-  $.getJSON('/state', function(data) {
+  $.getJSON('/config.json', function (data1) {
+     $.getJSON('/state', function (data) {
 // Récupérer les données du JSON
       var state = data.state;
+	  if (state == 'Reseau') {state = 'Réseau' ; }
       var watt = data.watt;
       var dimmer = data.dimmer;
       var temperature = data.temperature;
@@ -377,17 +355,27 @@
       var relais2 = data.relay2;
       
       if (temperature == null) { temperature = 0 ; }
-     // var version = data.version; 
+      var version = data.version; 
       var rssi = data.RSSI;
-      //var name = data.name;
+      var name = data.name;
+
+	    var delta = data1.delta;
+	    var deltaneg = data1.deltaneg;
       // Mettre à jour les éléments HTML
       dataGaugePA.setValue(0, 0, state);
       dataGaugePA.setValue(0, 1, watt);
+      optionsGauge.redFrom = deltaneg ;
+      optionsGauge.redTo = delta ;
+      optionsGauge.redColor = '#01DF3A';
+      optionsGauge.yellowFrom = deltaneg-70 ;
+      optionsGauge.yellowTo = delta+70 ;
+      gaugePA.draw(dataGaugePA,optionsGauge);
 
-      dataGaugePApower.setValue(0, 0, "Watt"); 
+
+      dataGaugePApower.setValue(0, 0, "Watts"); 
 		  dataGaugePApower.setValue(0, 1, dimmer);
 
-      dataGaugePAtemp.setValue(0, 0, "Temp °C"); 
+      dataGaugePAtemp.setValue(0, 0, "°C"); 
       dataGaugePAtemp.setValue(0, 1, temperature);
 
       gaugePA.draw(dataGaugePA,optionsGauge);
@@ -396,72 +384,44 @@
 		
 		  document.getElementById("state").innerHTML = state;
 		  document.getElementById("sigma").innerHTML = watt;
-      document.getElementById("version").innerHTML = data.version;
-      document.getElementById("RSSI").innerHTML = 'RSSI : ' + rssi + ' dBm';
-      document.getElementById("name").innerHTML = data.name  ;
+      document.getElementById("version").innerHTML = version;
+      document.getElementById("RSSI").innerHTML = 'Signal WiFi: ' + rssi + ' dBm';
+      document.getElementById("name").innerHTML = name;
 
-      // ecriture de "minuteur" dans le div minuteur si l'état est à 1
-          if (data.minuteur == 1) {
-            document.getElementById("minuteur").innerHTML = "Minuteur";
-            document.getElementById("minuteur").style.color = "red";
-        } else {
-            document.getElementById("minuteur").innerHTML = "Non actif";
-            document.getElementById("minuteur").style.color = "";
-        }
-
-    // ecriture de "ON" dans le div relais 1 si l'état est à 1
-        if (relais1 == 1) {
-            document.getElementById("relais 1").innerHTML = "ON";
-            document.getElementById("relais 1").style.color = "red";
-        } else {
-            document.getElementById("relais 1").innerHTML = "OFF";
-            document.getElementById("relais 1").style.color = "";
-        }
-
-    // ecriture de "ON" dans le div relais 2 si l'état est à 1
-        if (relais2 == 1) {
-            document.getElementById("relais 2").innerHTML = "ON";
-            document.getElementById("relais 2").style.color = "red";
-        } else {
-            document.getElementById("relais 2").innerHTML = "OFF";
-            document.getElementById("relais 2").style.color = "";
-        }
-
-        // ecriture de "ON" dans le div relais 1 si l'état est à 1
-          if (data.dallas == 0) {
-            document.getElementById("dallas").innerHTML = "Connect";
-            document.getElementById("dallas").style.color = "";
-        } else {
-            document.getElementById("dallas").innerHTML = "Disconnect";
-            document.getElementById("dallas").style.color = "red";
-        }
-
-        // ecriture de "ON" dans le div relais 1 si l'état est à 1
-          if (data.security == 0) {
-            document.getElementById("securite").innerHTML = "OK";
-            document.getElementById("securite").style.color = "";
-        } else {
-            document.getElementById("securite").innerHTML = "Refroidissement";
-            document.getElementById("securite").style.color = "red";
-        }
-
+      });
     });
+
   }, 2000);
+  
+ 			
+var recupconfig = $.get ({
+		url : '/config',
+		type : 'GET',
+		dataType: "text",
+		async: false }).responseText; 
+				  
+ var config = recupconfig.split(";");
+
 }
-</script>
-<script type='text/javascript' >
 
-    function sendservermode (mode) {
 
-    $.get( "/get", { servermode: mode } )
-    .done(function(data) { 
+	
 
-    var config = data.split(";");
-    document.getElementById("screen").value = config[21];
-    }); 
+				  
+function sendservermode (mode) {
 
-    }
-</script>
+$.get( "/get", { servermode: mode } )
+.done(function(data) { 
+
+var config = data.split(";");
+document.getElementById("screen").value = config[21];
+}); 
+
+}
+
+
+		
+		</script >
 		
   
                      <div id='curve_chart' style=' width: auto; height: 500px;'>

@@ -9,11 +9,12 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Pv router - Wifi Configuration</title>
+  <title>PV Routeur - Configuration Wifi</title>
 
   <!-- Custom fonts for this template-->
 
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+		  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
   <style type="text/css">
 .fas{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;display:inline-block;font-style:normal;font-variant:normal;text-rendering:auto;line-height:1;}
@@ -261,7 +262,7 @@ footer.sticky-footer .copyright{line-height:1;font-size:.8rem;}
         <div class="sidebar-brand-icon rotate-n-15">
           <i class="fas fa-laugh-wink"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">Pv router</div>
+        <div class="sidebar-brand-text mx-3" id="name">Pv routeur</div>
       </a>
 
       <!-- Divider -->
@@ -271,9 +272,13 @@ footer.sticky-footer .copyright{line-height:1;font-size:.8rem;}
       <li class="nav-item active">
         <a class="nav-link" href="/">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Dashboard</span><br>
-		<span id="version"></span></a>
-		  
+          <span>Tableau de bord</span><br>
+          <i class="fas fa-fw fa-code-branch"></i>
+		<span id="version">Version </span><br>
+		<br>
+		<i class="fa fa-wifi"></i>
+    <span id="RSSI">Signal WiFi: </span>
+</a> 
       </li>
 
 
@@ -374,7 +379,7 @@ footer.sticky-footer .copyright{line-height:1;font-size:.8rem;}
 
               <div class="card position-relative">
                 <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Configuration</h6>
+                  <h6 class="m-0 font-weight-bold text-primary">Paramètres</h6>
 				  <span id="saveform"></span>
                 </div>
 
@@ -391,7 +396,7 @@ footer.sticky-footer .copyright{line-height:1;font-size:.8rem;}
             </div>
 
             <div class="form-group">
-              Password :<input type="password" class="form-control form-control-user" id="password" placeholder="%PASSWORD%">
+              Mot de passe :<input type="password" class="form-control form-control-user" id="password" placeholder="%PASSWORD%">
             </div>
 
 				  
@@ -435,6 +440,20 @@ function save () {
 
 }
 
+      //<!-- rafraichissement valeurs -->
+      setInterval(function refreshsend( ) {
+        $.getJSON('/state', function(data) {
+          // Récupérer les données du JSON
+            var version = data.version;
+            var rssi = data.RSSI;
+			var name = data.name;
+          document.getElementById("version").innerHTML = version;
+          document.getElementById("RSSI").innerHTML = 'Signal WiFi: ' + rssi  + ' dBm';
+		  document.getElementById("name").innerHTML = name  ;
+          });
+          }, 5000);
+		
+		
 		</script >
 
 
@@ -475,7 +494,6 @@ $( "#formulaire" ).submit(function() {
   return false;
 });
 
-
 var recupconfig =  $.getJSON('/getwifi', function(data) {
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
@@ -487,8 +505,6 @@ var recupconfig =  $.getJSON('/getwifi', function(data) {
             // Une fois la requête terminée
             recupconfig.done(function() {
         });
-    });
-    
     
 </script>
 				  
