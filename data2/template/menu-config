@@ -3,13 +3,17 @@
 
       <!-- Nav Item - Dashboard -->
       <li class="nav-item active">
-        <a class="nav-link" href="/" >
+        <a class="nav-link" href="/">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Dashboard</span><br>
-          <span id="version">Version: </span><br>
-          <span id="RSSI">RSSI (dB): </span>
-        </a>
-	  </li>
+          <span>Tableau de bord</span><br>
+          <i class="fas fa-fw fa-code-branch"></i>
+		<span id="version">Version </span><br>
+		<br>
+		<i class="fa fa-wifi"></i>
+    <span id="RSSI">Signal WiFi: </span>
+</a> 
+		  
+      </li>
 
 
 
