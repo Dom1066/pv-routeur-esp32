@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="">
         <meta name="author" content="">
-        <title>Pv Routeur  - minuteur Configuration</title>
+        <title>Pv Routeur  - Configuration minuteur</title>
         <!-- Custom fonts for this template-->
         <link href="all.min.css" rel="stylesheet" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -32,17 +32,22 @@
                     <div class="sidebar-brand-icon rotate-n-15">
                         <i class="fas fa-laugh-wink"></i>
                     </div>
-                    <div class="sidebar-brand-text mx-3">Pv Routeur</div>
+                    <div class="sidebar-brand-text mx-3" id="name">Pv routeur</div>
                 </a>
                 <!-- Divider -->
                 <hr class="sidebar-divider my-0">
-                <!-- Nav Item - Dashboard -->
+        <!-- Nav Item - Dashboard -->
                 <li class="nav-item active">
                     <a class="nav-link" href="/">
                         <i class="fas fa-fw fa-tachometer-alt"></i>
-                        <span>Dashboard</span>
+                        <span>Tableau de bord</span>
                         <br>
-                        <span id="version"></span>
+                        <i class="fas fa-fw fa-code-branch"></i>
+                        <span id="version"> %VERSION%</span>
+                        <br>
+                        <br>
+                        <i class="fa fa-wifi"></i>
+                        <span id="RSSI">Signal WiFi : %RSSI% dBm</span>
                     </a>
                 </li>
                 <!-- Divider -->
@@ -52,19 +57,14 @@
                     Interface
                 </div>
                 <!-- Nav Item - Pages Collapse Menu -->
-                <li class="nav-item active">
-                    <a class="nav-link" href="/">
-                        <i class="fas fa-fw fa-plug"></i>
-                        <span>retour conso</span>
-                    </a>
-                </li>
-                <li class="nav-item active">
+ 
+                <li class="nav-item">
                     <a class="nav-link" href="config.html">
                         <i class="fas fa-fw fa-cog"></i>
                         <span>Configuration</span>
                     </a>
                 </li>
-                <li class="nav-item active">
+                <li class="nav-item">
                     <a class="nav-link" href="/reboot">
                         <i class="fas fa-fw fa-power-off"></i>
                         <span>Reboot</span>
@@ -85,24 +85,19 @@
                     <!-- Topbar -->
                     <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
  
-          <!-- Topbar Navbar -->
-                        <ul class="navbar-nav ml-auto">
-                            <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-                            <li class="nav-item dropdown no-arrow d-sm-none">
-                                <!-- Dropdown - Messages -->
-                                <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown"></div>
+            <!-- Topbar Navbar -->
+            <ul class="navbar-nav ml-auto">
+                            <li class="nav-item dropdown no-arrow">
+
+                                    <span class="mr-2 d-none d-lg-inline text-gray-600">
+                                        <button class="btn btn-primary active col-lg-12" id="time" >%time%</button></b>
+                                    </span>
+
                             </li>
-                            <!-- Nav Item - Alerts -->
-                            <li class="nav-item mx-1">
-                                <a
-                                    id="heure"
-                                >
-                                </a>
-                            </li>
-                            <div class="topbar-divider d-none d-sm-block"></div>
-                        </ul>
-                    </nav>
-                    <!-- End of Topbar -->
+            </ul>
+            <div class="topbar-divider d-none d-sm-block"></div>
+          </nav>
+          <!-- End of Topbar -->
                     <!-- Begin Page Content -->
                     <div class="container-fluid">
                         <!-- Page Heading -->
@@ -176,7 +171,10 @@
                 </div>
             </div>
             <!-- Content Row -->
-<script>
+    <script type="text/javascript">
+     window.onload = function () {
+        horloge("time");
+      };
   $(document).ready(function() {
     // Récupération des heures de démarrage et d'arrêt depuis le serveur
     $.get("/getminiteur?relay2", function(data) {
@@ -204,6 +202,23 @@
       var minute = data.minute < 10 ? "0" + data.minute : data.minute;
       $("#heure").html( heure + ":" + minute );
     });
+	
+	
+      //<!-- rafraichissement valeurs -->
+      setInterval(function refreshsend( ) {
+        $.getJSON('/state', function(data) {
+          // Récupérer les données du JSON
+            var version = data.version;
+            var rssi = data.RSSI;
+			var name = data.name;
+          document.getElementById("version").innerHTML = version;
+          document.getElementById("RSSI").innerHTML = 'Signal WiFi: ' + rssi  + ' dBm';
+		  document.getElementById("name").innerHTML = name  ;
+          });
+          }, 5000);
+		
+		
+
 
     // Envoi des données de formulaire au serveur lors de la soumission du formulaire
     $("#dimmer-form").submit(function(event) {
@@ -233,15 +248,18 @@
   
   });
 
-  // Récupération de l'heure depuis le serveur toutes les 15 secondes
-  setInterval(function ( ) {
-    $.getJSON('/getminiteur', function(data) {
-        // Affichage de l'heure au format 2 digits
-        var heure = data.heure < 10 ? "0" + data.heure : data.heure;
-        var minute = data.minute < 10 ? "0" + data.minute : data.minute;
-        $("#heure").html( heure + ":" + minute );
-      });
-	}, 15000);
+function horloge(el) {
+  if(typeof el=="string") { el = document.getElementById(el); }
+  function actualiser() {
+    var date = new Date();
+    var str = date.getHours();
+    str += ':'+(date.getMinutes()<10?'0':'')+date.getMinutes();
+    str += ':'+(date.getSeconds()<10?'0':'')+date.getSeconds();
+    el.innerHTML = str;
+  }
+  actualiser();
+  setInterval(actualiser,1000);
+}
 </script>
 
         </div>

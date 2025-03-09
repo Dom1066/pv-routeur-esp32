@@ -131,7 +131,7 @@ String getState() {
   }
  
   const String fs_update = String("<br>!! FS pas à jour !!") ;
-  const String pvname = String("PV ROUTER ") + WiFi.macAddress().substring(12,14)+ WiFi.macAddress().substring(15,17);
+  const String pvname = String("PV ROUTEUR ") + WiFi.macAddress().substring(12,14)+ WiFi.macAddress().substring(15,17);
   JsonDocument doc;
   doc["state"] = state;
   doc["watt"] = int(gDisplayValues.watt);
