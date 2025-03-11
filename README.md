@@ -1,4 +1,4 @@
-Version avec modificatos visuelles
+Version avec modifications visuelles
 
 [![image-1695289829494.png](https://raw.githubusercontent.com/Dom1066/pv-routeur-esp32/refs/heads/Modifs-visuelles/img/Tableau%20de%20bord%2020250309.jpg)
 
