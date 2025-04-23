@@ -80,18 +80,20 @@ WiFiClient espClient;
       if (client.connect(pvname.c_str(), configmqtt.username, configmqtt.password)) {
         // Once connected, publish online to the availability topic
         client.publish(topic.c_str(), "online", true);         
-        client.setKeepAlive(30);      
+        client.setKeepAlive(15);  
+        client.setBufferSize(1024);    
         logging.Set_log_init(MQTT_connected,true);
         Serial.println(MQTT_connected);
       } else {
         Serial.print("MQTT failed, retcode="); 
         Serial.print(client.state());
-        Serial.println(" try again in 2 seconds");
+        Serial.println(" try again in 5 seconds");
         ///dans le doute si le mode AP est actif on le coupe
         Serial.println(WiFi.status());
 
         // Wait 2 seconds before retrying
-        delay(2000);  // 24/01/2023 passage de 5 à 2s 
+        yield(); // permet de libérer le CPU pour d'autres tâches
+        delay(5000);  // 24/01/2023 passage de 5 à 2s 
       } // else
     } // while
   }
@@ -229,14 +231,12 @@ WiFiClient espClient;
     client.subscribe(("memory/"+compteur_grid.topic+"#").c_str());
     client.loop();
  
-    if (xSemaphoreTake(mutex, portMAX_DELAY)) {  // Prend le mutex  
       if (config.IDXdimmer != 0 ) {  
         Mqtt_send(String(config.IDXdimmer),"0","","Dimmer"); 
       }
       if (strcmp(config.topic_Shelly,"none") != 0) 
         client.subscribe(config.topic_Shelly);
-      xSemaphoreGive(mutex);  // Libère le mutex
-    }
+
   }
 #endif //ifndef LIGHT_FIRMWARE
 #endif //ifndef MQTT_FUNCTIONS

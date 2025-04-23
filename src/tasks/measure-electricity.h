@@ -41,6 +41,10 @@ void measureElectricity(void *parameter) { // NOSONAR
   for (;;) {
     // recherche du mode de fonctionnement
     int mode = 0; /// 0 = porteuse  ; 1 = shelly , 2 = enphase 3 = fronius  , 4 = demo
+    
+    #ifdef DEMO
+      mode = 4;
+    #endif
 
     // vérification qu'une autre task ne va pas fausser les valeurs
     long start = millis();
@@ -55,7 +59,7 @@ void measureElectricity(void *parameter) { // NOSONAR
     else if (configmodule.Fronius_present) {
       mode = 3;
     }
-    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+
       // SCT 013
       #ifndef ESP32D1MINI_FIRMWARE
         if (mode == 0) {
@@ -145,8 +149,7 @@ void measureElectricity(void *parameter) { // NOSONAR
           }
         } // mode == 3
       } // (!AP)
-      xSemaphoreGive(mutex); // Libère le mutex
-    }
+
     
     long end = millis();
     task_mem.task_measure_electricity = uxTaskGetStackHighWaterMark(nullptr);
