@@ -6,6 +6,7 @@ gzip -9 index-ap.html -c > index-ap.html.gz
 gzip -9 index-light.html -c > index-light.html.gz
 gzip -9 wifi.html -c > wifi.html.gz
 gzip -9 envoy.html -c > envoy.html.gz
+gzip -9 battery.html -c > battery.html.gz
 
 gzip -9 config.html -c > config.html.gz
 gzip -9 config-ap.html -c > config-ap.html.gz
@@ -25,6 +26,4 @@ gzip -9 ../data2/fa-solid-900.woff2 -c > fa-solid-900.woff2.gz
 
 gzip -9 log.html  -c > log.html.gz
 
-SRC_DIR="$(dirname "$(realpath "$0")")"
-DST_DIR=$(realpath "$SRC_DIR/../data")
-grep "constexpr const int FS_RELEASE" "$SRC_DIR/../src/config/config.h" | tr -d ';' | cut -d' ' -f 6 > "$DST_DIR/version"
+

@@ -267,44 +267,51 @@
             <br>
 
             <div class="card position-relative">
-              <div class="card-header py-6">
+              <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary" data-toggle="popover" data-placement="top" title="Aide" data-bs-content="Cochez et configurez si utilisation d'un dimmer local">Dimmer Local ℹ</h6>
                   <span id="saveform"></span>
               </div>
               <div class="card-body">
 
                 <div class="form-group row"> 
-                  
-                    <div class="col-sm-3">
+                 
+                    <div class="col-sm-4">
                     <div class="custom-control custom-checkbox small">
                             <input type="checkbox" class="custom-control-input" id="dimmerlocal" onchange="sendservermode('dimmerlocal');">
                             <label class="custom-control-label" for="dimmerlocal" >Dimmer local</label>
+							
                     </div>
                     </div>
-                    <div class="col-sm-3">
-                        Limiteur local (%): <input type="number"  step="1" class="form-control form-control-user" id="Fusiblelocal" placeholder="%FUSELOCAL%">
+
+                    <div class="col-sm-4">
+                        <span> Limiteur (%)</span> <input type="number"  step="1" class="form-control form-control-user" id="Fusiblelocal" placeholder="%FUSELOCAL%">
                     </div>
-                    <div class="col-sm-3"><span>Charge connectée (W):</span>
+                    <div class="col-sm-4"><span> Charge (W)</span>
                       <input type="number" step="1" class="form-control form-control-user" id="resistance" placeholder="%RESISTANCE%">
-                    </div>
-                    <div class="col-sm-3"></div>
+	            <br>
 
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-3">
-                      Max temp (°C): <input type="number" step="1"class="form-control form-control-user" id="maxtemp" placeholder="%MAXTEMP%">
                     </div>
-                    <div class="col-sm-3">
-                      Trigger (%): <input type="number" step="1"class="form-control form-control-user" id="trigger" placeholder="%TRIGGER%">
+					
+                    <div class="col-sm-4"></div>
+ 			 
+                    <div class="col-sm-4"></div>
+					<div class="form-group row">
+                    <div class="col-sm-4">
+                       <span> Temp.maxi. (°C)</span> <input type="number" step="1"class="form-control form-control-user" id="maxtemp" placeholder="%MAXTEMP%">
+                    </div>
+                    <div class="col-sm-4">
+                     <span> Baisse/relance (%)</span> <input type="number" step="1"class="form-control form-control-user" id="trigger" placeholder="%TRIGGER%">
                     </div>                    
-                    <div class="col-sm-3">
-                      Min temp (°C): <input type="number" step="1"class="form-control form-control-user" id="mintemp" placeholder="%MINTEMP%">
+                    <div class="col-sm-4">
+                      <span> Temp.mini. (°C)</span> <input type="number" step="1"class="form-control form-control-user" id="mintemp" placeholder="%MINTEMP%">
                     </div>
-
+</div>
                 </div>
               </div>
             </div>
 
             <br>
+
 
             <div class="card position-relative">
               <div class="card-header py-3">
@@ -313,15 +320,15 @@
               </div>
                 <div class="card-body">        
                 <div class="form-group row">
-                <div class="col-sm-4 delta" data-toggle="popover" title="Aide" data-bs-content="Le routage diminura en dessous de cette valeur"><span>Limite Consommation (Delta)(W) ℹ</span> </div>
-                  <div class="col-sm-4 deltaneg" data-toggle="popover" title="Aide" data-bs-content="Le routage augmentera au dessus de cette valeur"><span>Limite Injection (deltaneg)(W) ℹ</span> </div>
+                <div class="col-sm-5 delta" data-toggle="popover" title="Aide" data-bs-content="Le routage diminura en dessous de cette valeur"><span>Limite Consommation (Delta)(W) ℹ</span> </div>
+                  <div class="col-sm-5 deltaneg" data-toggle="popover" title="Aide" data-bs-content="Le routage augmentera au dessus de cette valeur"><span>Limite Injection (deltaneg)(W) ℹ</span> </div>
                 </div>
 				
                 <div class="form-group row">
-                  <div class="col-sm-4">
+                  <div class="col-sm-5">
                   <input type="number" step="1" class="form-control form-control-user" id="delta" placeholder="%DELTA%">
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-5">
                   <input type="number" step="1" class="form-control form-control-user" id="deltaneg" placeholder="%DELTANEG%">
                 </div>
 
