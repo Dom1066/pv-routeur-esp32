@@ -134,7 +134,7 @@ Once the code has been uploaded via the website and the entire router assembled,
 
 You can therefore consult the information reported by the PV router.
 
-[![image-1695289829494.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/scaled-1680-/image-1695289829494.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/image-1695289829494.png)
+[![index.jpg](https://raw.githubusercontent.com/Dom1066/pv-routeur-esp32/refs/heads/Modifs-visuelles/img/index.jpg)
 
 On this interface you will find a gauge with the power requested from the network (Sigma, in W), the power requested from the dimmers (in %) and the temperature (in °C) reported by the probe of the 1st dimmer if existing (or probe present locally).
 
