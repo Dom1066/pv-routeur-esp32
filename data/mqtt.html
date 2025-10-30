@@ -12,7 +12,7 @@
   <title>Pv routeur - Configuration MQTT</title>
 
   <!-- Custom fonts for this template-->
- <link href="all.min.css" rel="stylesheet" type="text/css"> 
+  <link href="all.min.css" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
   <!-- Custom styles for this template-->
@@ -97,10 +97,7 @@
           <i class="fas fa-fw fa-power-off"></i>
           <span>Reboot</span>
       </a>
-
-
-  
-
+    </li>  
 
       <!-- Divider -->
       <hr class="sidebar-divider d-none d-md-block">
@@ -165,10 +162,10 @@
             <div class="col-sm-3">
               <div class="custom-control custom-checkbox small">
                 <input type="checkbox" class="custom-control-input" id="MQTT" onchange="sendservermode('MQTT');">
-                <label class="custom-control-label" for="MQTT"  >MQTT</label>
+                <label class="custom-control-label" for="MQTT"  >MQTT actif</label>
               </div>
             </div>
-          
+            <br>          
 
             <div class="form-group">
               Serveur  :<input type="text" class="form-control form-control-user" id="server" placeholder="%SERVER%">
@@ -179,7 +176,7 @@
             </div>
 
             <div class="form-group">
-              <a data-toggle="popover" title="Aide" data-bs-content="Utile dans le cas d'un serveur Domoticz ou Jeedom"> Topic ℹ </a> :<input type="text" class="form-control form-control-user" id="topic" placeholder="%TOPIC%">
+              <div class="col-sm-5" data-toggle="popover"  data-bs-content="Utile dans le cas d'un serveur Domoticz ou Jeedom"> Topic : <i class="text-secondary fas fa-info-circle"></i></div> <input type="text" class="form-control form-control-user" id="topic" placeholder="%TOPIC%">
             </div>
 
             <div class="form-group">
@@ -194,7 +191,7 @@
 
             <div class="card position-relative">
               <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary" data-toggle="popover" data-placement="top" title="Aide" data-bs-content="Index pour les remontés Domoticz ou Jeedom">MQTT Domoticz ℹ</h6>
+                <div class="col-sm-4" data-toggle="popover" data-placement="top" data-bs-content="Index pour les remontés Domoticz ou Jeedom">MQTT Domoticz <i class="text-secondary fas fa-info-circle"></i></div>
                   <span id="saveform"></span>
               </div>
               <div class="card-body">
@@ -207,7 +204,7 @@
                             IDX Puissance routée: <input type="number" step="1" class="form-control form-control-user" id="IDXDIMMER" placeholder="%IDXDIMMER%">
                     </div>
                     <div class="col-sm-4">
-                      IDX Température: <input type="number" step="1" class="form-control form-control-user" id="IDXDALLAS" placeholder="%IDXDALLAS%">
+                      IDX Température:&emsp; &emsp;   <input type="number" step="1" class="form-control form-control-user" id="IDXDALLAS" placeholder="%IDXDALLAS%">
                     </div>
                 </div>
               </div>
@@ -215,18 +212,18 @@
             <br>
             <div class="card position-relative">
               <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary" data-toggle="popover" title="Aide" data-placement="top" data-bs-content="Cochez pour une remonté sur Home Assistant">HA MQTT ( Envoie d'info MQTT sur topic HA ) ℹ</h6>
+                <div class="col-sm-3" data-toggle="popover" data-placement="top" data-bs-content="Cochez pour une remontée d'infos MQTT sur Home Assistant">HA MQTT <i class="text-secondary fas fa-info-circle"></i></div>
                   <span id="saveform"></span>
               </div>
               <div class="card-body">
 
                 <div class="form-group row">
-                  <div class="col-sm-3">
+                  <div class="col-sm-5">
                     <div class="custom-control custom-checkbox small">
-                      Actif
+                      
                       <br>
                       <input type="checkbox" class="custom-control-input" id="HA" onchange="sendservermode('HA');">
-                      <label class="custom-control-label" for="HA"  >HA</label>
+                      <label class="custom-control-label" for="HA"  >HA actif</label>
                     </div>
                   </div>
 
