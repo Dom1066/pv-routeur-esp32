@@ -999,7 +999,11 @@ static int deltaneg_backup = 0;
         config.deltaneg = deltaneg_backup;
         config.batterie_active = false;
         logging.Set_log_init("Batterie désactivée, offset réinitialisé \n", true);
+        // affichage de la température pour vérifier que le changement d'offset est pris en compte
+        Serial.print("Température après réinitialisation de l'offset batterie : ");
+        logging.Set_log_init(String(gDisplayValues.temperature).c_str(), true); //debug
       }
+
     //}
 
   /// fin gestion de l'offset batterie

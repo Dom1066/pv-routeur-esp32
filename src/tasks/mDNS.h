@@ -141,27 +141,38 @@ bool mdns_search(const char* type, uint16_t port) {
 //************* mdns_discovery
 //***********************************
 void mdns_discovery(void *parameter) {    // NOSONAR
-  for (;;) {        
-    int Taskdelay = 10000;
-      if (WiFi.status() == WL_CONNECTED && (strcmp(config.dimmer, "") == 0 || strcmp(config.dimmer, "none") == 0) ) { 
-        if (!AP) {                       
-          // recherche d'un dimmer
-          if (!mdns_search("sunstain", 80)) {
-            // recherche de l'ancienne version dimmer  ( à supprimer 01/07/2025 )
-            mdns_search("http", 1308);
-          }
+  uint32_t Taskdelay = 10000;             // 10s initial
+  const uint32_t MAX_DELAY = 1800000;    // 30 min max
+
+  for (;;) {
+    if (WiFi.status() == WL_CONNECTED && (strcmp(config.dimmer, "") == 0 || strcmp(config.dimmer, "none") == 0)) {
+      if (!AP) {
+        bool found = mdns_search("sunstain", 80);
+        if (!found) {
+          // recherche de l'ancienne version dimmer  ( à supprimer 01/07/2025 )
+          found = mdns_search("http", 1308);
+        }
+        if (found) {
+          Taskdelay = 10000; // reset (task supprimée juste après)
+        } else {
+          // backoff progressif : double le délai à chaque échec jusqu'au plafond
+          Taskdelay = (Taskdelay * 2 > MAX_DELAY) ? MAX_DELAY : Taskdelay * 2;
+          Serial.printf("mDNS: aucun dimmer, prochain essai dans %lu s\n", Taskdelay / 1000);
         }
       }
-      else {
-        Taskdelay = 600000+(esp_random() % 61) - 30; // 10 minutes
-      }
-    //si config.dimmer défini, on arrête la tâche
+    } else {
+      // WiFi perdu : reset du backoff pour repartir vite à la reconnexion
+      Taskdelay = 10000;
+    }
+
+    // si config.dimmer défini, on arrête la tâche
     if (strcmp(config.dimmer, "") != 0 && strcmp(config.dimmer, "none") != 0) {
+      Serial.println("mDNS discovery arrêté, dimmer trouvé.");
       vTaskDelete(NULL);
-      Serial.println("Service mDNS arrêté, dimmer trouvé.");
-    }    
+    }
+
     vTaskDelay(Taskdelay / portTICK_PERIOD_MS);
-  } // for 
+  } // for
 }
 
 

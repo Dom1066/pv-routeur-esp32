@@ -109,6 +109,7 @@ void measureElectricity(void *parameter) { // NOSONAR
               else {
                 gDisplayValues.wattIsValid = true;
                 gDisplayValues.watt = temp_shellyWatt;
+                unified_dimmer.set_last_time(); // on met à jour le timer de sécurité du dimmer pour éviter les coupures intempestives en cas de lenteur du shelly
               }
             }
             #ifdef NORMAL_FIRMWARE
@@ -116,7 +117,7 @@ void measureElectricity(void *parameter) { // NOSONAR
                // client.loop(); // Keep the MQTT connection alive pour éviter les problèmes de connexion au broker quand on utilise le topic mqtt pour le shelly
               gDisplayValues.watt = gDisplayValues.Shelly;
               gDisplayValues.wattIsValid = true;
-
+              unified_dimmer.set_last_time(); // on met à jour le timer de sécurité du dimmer pour éviter les coupures intempestives en cas de lenteur du shelly
             }
             #endif
             
@@ -135,6 +136,7 @@ void measureElectricity(void *parameter) { // NOSONAR
             gDisplayValues.watt = gDisplayValues.Fronius_conso;
             gDisplayValues.Fronius_conso = tempo;
             gDisplayValues.wattIsValid = true;
+            unified_dimmer.set_last_time(); // on met à jour le timer de sécurité du dimmer pour éviter les coupures intempestives en cas de lenteur de l'enphase
           }
           else
             Serial.println("⚠️ Measure Electricity - Mode 2 : pas de wifi");
@@ -146,6 +148,7 @@ void measureElectricity(void *parameter) { // NOSONAR
           if (WiFi.status() == WL_CONNECTED) {
             Fronius_get();
             gDisplayValues.wattIsValid = true;
+            unified_dimmer.set_last_time(); // on met à jour le timer de sécurité du dimmer pour éviter les coupures intempestives en cas de lenteur du fronius
           }
         } // mode == 3
       } // (!AP)

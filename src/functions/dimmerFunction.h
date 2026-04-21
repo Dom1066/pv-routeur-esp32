@@ -58,7 +58,7 @@ void dimmer_change(char dimmerurl[15], int dimmerIDX, int dimmervalue, int puiss
  /// envoyer la commande avec la valeur gDisplayValues.dimmer vers le dimmer config.dimmer
  #if WIFI_ACTIVE == true
     /// control dimmer 
-    if ( strcmp(config.dimmer,"none") != 0 && strcmp(config.dimmer,"") != 0) {
+    if ( strcmp(config.dimmer,"none") != 0 && strcmp(config.dimmer,"") != 0 && strcmp(config.dimmer,"0.0.0.0") != 0 ) {
       char baseurl[50]; 
       
       #ifndef POURCENTAGE
@@ -73,12 +73,13 @@ void dimmer_change(char dimmerurl[15], int dimmerIDX, int dimmervalue, int puiss
       }
           
       http.begin(dimmerurl,80,baseurl);   
+      http.setTimeout(2000); // à ajouter pour éviter les blocages en cas de problème de réseau ou de dimmer
       http.GET(); // envoie de la commande
       http.end(); // fermeture de la connexion
       if (logging.serial) {
         Serial.println(POWER_COMMAND + String(dimmervalue));
       }
-      if (logging.power) {            
+      if (logging.power) {    
         logging.Set_log_init(POWER_COMMAND);
         char buf_int[30];
         snprintf(buf_int, sizeof(buf_int), "%d W\n", puissance_dispo);
@@ -155,7 +156,7 @@ void dimmer()
     /// Modif RV 20240219
     /// Si et seulement si on n'a pas de dimmer enfant, sinon on ne lui routerait aucune puissance !!!!!
     /// Modification du if() qui ne fonctionnait pas à tous les coups
-    if (strcmp(config.dimmer, "") == 0 || strcmp(config.dimmer, "none") == 0)
+    if (strcmp(config.dimmer, "") == 0 || strcmp(config.dimmer, "none") == 0 || strcmp(config.dimmer, "0.0.0.0") == 0)
     { // Si pas de dimmer fils, on bride la puissance
       gDisplayValues.dimmer = config.localfuse;
       gDisplayValues.change = 1;
@@ -266,8 +267,10 @@ void dimmer()
 
             if (gDisplayValues.dimmer < config.localfuse && !programme.run )
             {
+              
               unified_dimmer.set_power(gDisplayValues.dimmer);
               DEBUG_PRINTLN("------- dimmerFunction " + String(__LINE__) + " -----------");
+              DEBUG_PRINTLN("------- gDisplayValues.dimmer " + String(gDisplayValues.dimmer) + " -----------");
               dimmer_change(config.dimmer, config.IDXdimmer, 0, puissance_dispo);
             }
             else
@@ -278,10 +281,12 @@ void dimmer()
               { // permet d'éviter de trop de donner de puissance au dimmer enfant quand gros soleil d'un coup
                 puissance_dispo = puissance_dispo - ((config.localfuse - unified_dimmer.get_power()) * config.charge / 100);
                 DEBUG_PRINTLN("------- dimmerFunction " + String(__LINE__) + " -----------");
+                DEBUG_PRINTLN("------- gDisplayValues.dimmer " + String(gDisplayValues.dimmer) + " -----------");
               }
               if (!dallas.lost)
               { /// Sécurité si pas de perte de la dallas sinon ça clignote
                 DEBUG_PRINTLN("------- dimmerFunction " + String(__LINE__) + " -----------");
+                DEBUG_PRINTLN("------- gDisplayValues.dimmer " + String(gDisplayValues.dimmer) + " -----------");
                 unified_dimmer.set_power(gDisplayValues.dimmer);
                 //   ledcWrite(0, config.localfuse*256/100);
                 if (strcmp(config.dimmer, "") != 0 && strcmp(config.dimmer, "none") != 0)

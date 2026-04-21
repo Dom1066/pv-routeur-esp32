@@ -34,8 +34,14 @@ struct gestion_puissance {
 
   public:SafeVar<float> power;
 
+  // setter pour last_time
+  void set_last_time() {
+    last_time = millis();
+  }
+
   // setter
   void set_power(float unified_power,const char* reason="") {   /// le char reason est principalement utilisé pour le debug
+    int pmesure = int(gDisplayValues.watt);
     last_time = millis();
     if ( gDisplayValues.temperature > config.tmax ) { unified_power = 0; } /// si la température est supérieur à la température max on coupe tout
     else if ( unified_power > config.localfuse )  { unified_power = config.localfuse; } /// si puissance demandée supérieur à ma puissance max reglé alors puissance max
@@ -134,7 +140,7 @@ struct gestion_puissance {
     #endif   
         snprintf(temp_buffer, sizeof(temp_buffer),
              "dim 1: %d%%, dim 2: %d%%, dim 3: %d%%\r\n",
-             dimmer1_pwr, dimmer2_pwr, dimmer3_pwr);
+              dimmer1_pwr, dimmer2_pwr, dimmer3_pwr);
     logging.Set_log_init(temp_buffer, true); // log de la puissance envoyée aux dimmers
 
 }
@@ -160,20 +166,23 @@ struct gestion_puissance {
       if (dimmer1.getState()) {
         dimmer1.setPower(0);
         dimmer1.setState(OFF);
-        logging.Set_log_init("Dimmer1 Off\n");
+        snprintf(temp_buffer, sizeof(temp_buffer), "Dimmer1 Off - %s\n", reason);
+        logging.Set_log_init(temp_buffer);
         delay(50);
       }
       #ifdef outputPin2
         if (dimmer2.getState()) {
           dimmer2.setPower(0);
           dimmer2.setState(OFF);
-          logging.Set_log_init("Dimmer2 Off\n");
+          snprintf(temp_buffer, sizeof(temp_buffer), "Dimmer2 Off - %s\n", reason);
+          logging.Set_log_init(temp_buffer);
           delay(50);
         }
         if (dimmer3.getState()) {
           dimmer3.setPower(0);
           dimmer3.setState(OFF);
-          logging.Set_log_init("Dimmer3 Off\n");
+          snprintf(temp_buffer, sizeof(temp_buffer), "Dimmer3 Off - %s\n", reason);
+          logging.Set_log_init(temp_buffer);
           delay(50);
         }
       #endif
@@ -182,9 +191,9 @@ struct gestion_puissance {
   // fonction de coupure automatique après un certain temps
   void auto_off(int delay_off) {
     if (( millis() - last_time >= delay_off*60*1000)  && (power > 0) ) {
-      dimmer_off();
+      dimmer_off("Auto off");
       Serial.println("dimmer auto off");
-      last_time = millis();
+      set_last_time();
     }
   }
 }; // Structure gestion_puissance()

@@ -30,6 +30,7 @@ extern Memory task_mem;
 //***********************************
 int get_dimmer_child_power (){
   http.begin("http://" + String(config.dimmer) + "/state");   
+  http.setTimeout(2000); // 2 secondes de timeout pour la requete http
   int httpResponseCode = http.GET();
   int Ptotal_read;
   String dimmerstate = "0"; 
@@ -81,7 +82,7 @@ void updateDimmer(void * parameter) {
           local_power =  unified_dimmer.get_power()* config.charge/100; // watts
     
           // si dimmer distant alors calcul de puissance routée par contre si vide, none ou 0.0.0.0 alors pas de requête
-          if ( strcmp(config.dimmer,"") != 0 && strcmp(config.dimmer,"none") != 0 ) {  
+          if ( strcmp(config.dimmer,"") != 0 && strcmp(config.dimmer,"none") != 0 && strcmp(config.dimmer,"0.0.0.0") != 0 ) {
             child_power = get_dimmer_child_power();  // watts -->  REQUETE HTTP
           }
 
@@ -101,7 +102,7 @@ void updateDimmer(void * parameter) {
     // Sleep for 5 seconds, avant de refaire une analyse
 
     // 24/01/2023 changement de 5 à 4s 
-    vTaskDelay(pdMS_TO_TICKS(4000+(esp_random() % 61) - 30));
+    vTaskDelay(pdMS_TO_TICKS(4100+(esp_random() % 61) - 30));
   } // for
 }
 #endif

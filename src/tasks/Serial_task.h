@@ -23,7 +23,7 @@ extern Memory task_mem;
 //***********************************
 void serial_read_task(void * parameter) { // NOSONAR
   for (;;) {
-    const int timeout_task = 36; /// timeout à 2 minutes (au vrai 36 ca fait 3 minutes :) )
+    const int timeout_task = 36; /// timeout à 3 minutes 
 
     if (gDisplayValues.serial_timeout < timeout_task)  { 
         serial_read();

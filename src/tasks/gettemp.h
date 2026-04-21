@@ -42,11 +42,13 @@ void GetDImmerTemp(void * parameter){
         continue;
       }
 
-      if ( !dallas.detect && ( String(config.dimmer) != "" || String(config.dimmer) != "none")) {
+      
+      if ( !dallas.detect && ( strcmp(config.dimmer, "") != 0 && strcmp(config.dimmer, "none") != 0 && strcmp(config.dimmer, "0.0.0.0") != 0 ) ) {
         const String baseurl = "/state" ; 
         httpdimmer.begin(String(config.dimmer),80,baseurl);   
+        httpdimmer.setTimeout(2000); // 2 secondes de timeout pour la requete http
         int httpResponseCode = httpdimmer.GET();
-        String dimmerstate = "0"; 
+        String dimmerstate = "{\"temperature\":\"N/A\"}"; 
 
         //  read request return
         if (httpResponseCode>0) {
@@ -65,7 +67,8 @@ void GetDImmerTemp(void * parameter){
         httpdimmer.end();
 
         if (httpResponseCode>400) { 
-          gDisplayValues.temperature = 0;   
+           gDisplayValues.temperature = 0;
+           logging.Set_log_init("gettemp() HTTP 400\r\n",true);
         }
         else { 
           // hash temp 
@@ -77,6 +80,14 @@ void GetDImmerTemp(void * parameter){
             logging.Set_log_init("gettemp() failed: \r\n",true);
             Serial.println(error.c_str());
             gDisplayValues.temperature = gDisplayValues.temperature;
+            vTaskDelay(10*1000 / portTICK_PERIOD_MS);
+            continue;
+          }
+
+          // si la valeur de température est absurde, on la garde pas et on réessaie dans 10s
+          if (doc["temperature"].as<String>() == "N/A" || doc["temperature"].as<String>() == "NaN" || doc["temperature"].as<String>() == "nan" || doc["temperature"].as<String>() == "null" || doc["temperature"].as<String>() == "" ) {
+            gDisplayValues.temperature = gDisplayValues.temperature;
+            logging.Set_log_init("gettemp() : invalid temperature value\r\n",true);
             vTaskDelay(10*1000 / portTICK_PERIOD_MS);
             continue;
           }
