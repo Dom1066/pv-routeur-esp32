@@ -150,6 +150,9 @@ void call_pages() {
       {"/enphase.json", "/enphase.json"},
       {"/js/all.min.js", "/js/all.min.js"},
       {"/css/all.min.css", "/css/all.min.css"},
+      {"/icons.svg", "/icons.svg"},
+      {"/css/style.css", "/css/style.css"},
+      {"/js/app.js", "/js/app.js"}
     };
   
     for (const auto& file : staticFiles) {

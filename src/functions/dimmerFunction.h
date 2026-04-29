@@ -111,6 +111,12 @@ void dimmer()
     gDisplayValues.wattIsValid = false;
   }
 
+ // protection division par 0 
+ if (config.charge == 0) { 
+    gDisplayValues.dimmer = 0;
+    return; 
+  } 
+
   int puissance_dispo = 0;
   /// pour éviter les erreurs sur le site (inversion delta et deltaneg)
   if (config.delta < config.deltaneg)
@@ -368,7 +374,13 @@ int dimmer_getState() {
         /// Le fait de récupérer le champ "dimmer" ne récupère que la puissance locale du premier dimmer enfant
         /// il vaut donc mieux aller chercher l'info "Ptotal" plutôt que "dimmer" dans la page http:// - IPDIMMER - /state
         int dimmerWatt = doc["Ptotal"];
-        dimmer = (dimmerWatt*100/config.charge);
+        // division par 0 
+        if (config.charge != 0) {
+          dimmer = int(dimmerWatt * 100 / config.charge);
+        }
+        else {
+          dimmer = 0;
+        }
       }
     }    
   }  
