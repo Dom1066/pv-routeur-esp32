@@ -101,17 +101,17 @@ void call_pages() {
     else */ {
       server.on("/",HTTP_GET, [](AsyncWebServerRequest *request) {
         if(SPIFFS.exists("/index.html.gz") ){
-          #ifndef LIGHT_FIRMWARE
+//          #ifndef LIGHT_FIRMWARE
             compress_html(request,"/index.html.gz", "text/html");
-          #else
-            compress_html(request,"/index-light.html.gz", "text/html");
-          #endif
+//          #else
+//            compress_html(request,"/index-light.html.gz", "text/html");
+//          #endif
         }
         else {
           serveur_response(request, SPIFFSNO);
         }
       });
-
+/*
       server.on("/config.html", HTTP_GET, [](AsyncWebServerRequest *request){
         if(SPIFFS.exists("/config.html.gz")){
           #ifdef LIGHT_FIRMWARE
@@ -125,13 +125,13 @@ void call_pages() {
         else {
           serveur_response(request, SPIFFSNO);
         }
-      });
+      }); */
     }
 
     // pages  statiques
     // Define static files array with URL paths and file paths
     const char* staticFiles[][2] = {
-      {"/all.min.css", "/all.min.css"},
+   /*   {"/all.min.css", "/all.min.css"},
       {"/jquery.min.js", "/jquery.min.js"},
       {"/bootstrap.bundle.min.js", "/bootstrap.bundle.min.js"},
       {"/bootstrap.bundle.min.js.map", "/bootstrap.bundle.min.js.map"},
@@ -143,13 +143,13 @@ void call_pages() {
       {"/envoy.html", "/envoy.html"},
       {"/minuteur.html", "/minuteur.html"},
       {"/wifi.html", "/wifi.html"},
-      {"/mqtt.html", "/mqtt.html"},
+      {"/mqtt.html", "/mqtt.html"},*/
       {"/mqtt.json", "/mqtt.json"},
       {"/wifi.json", "/wifi.json"},
       {"/config.json", "/config.json"},
       {"/enphase.json", "/enphase.json"},
-      {"/js/all.min.js", "/js/all.min.js"},
-      {"/css/all.min.css", "/css/all.min.css"},
+    /*  {"/js/all.min.js", "/js/all.min.js"},
+      {"/css/all.min.css", "/css/all.min.css"},*/
       {"/icons.svg", "/icons.svg"},
       {"/js/app.js", "/js/app.js"},
       {"/css/style.css", "/css/style.css"}
