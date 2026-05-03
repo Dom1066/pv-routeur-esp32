@@ -149,6 +149,10 @@ struct gestion_puissance {
   float get_power() {
     // pour le dimmer robotdyn et SSR Random
     config.calcul_charge();
+    
+    if (config.charge == 0) { return 0; } // protection division par 0
+
+    int dimmerWatt = 0;
     int power1 = dimmer1.getPower();
 
     #ifdef outputPin2
