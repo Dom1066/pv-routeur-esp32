@@ -355,7 +355,7 @@ String getmqtt() {
   doc["server"] = config.mqttserver;
   doc["topic"] = config.Publish;
   doc["user"] = configmqtt.username;
-  doc["password"] = SECURITEPASS;
+  doc["password"] = configmqtt.password;
   doc["MQTT"] = config.mqtt;
   doc["IDX"] = config.IDX;
   doc["IDXDIMMER"] = config.IDXdimmer;

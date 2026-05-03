@@ -81,7 +81,7 @@ void serveur_response(AsyncWebServerRequest *request, String response) {
 //************* call_pages()
 //***********************************
 void call_pages() {
-  if (AP) {
+/*  if (AP) {
       server.on("/",HTTP_GET, [](AsyncWebServerRequest *request) {
         if(SPIFFS.exists("/index.html.gz")){
           compress_html(request,"/index-ap.html.gz", "text/html");
@@ -98,7 +98,7 @@ void call_pages() {
         }
       });
     }
-    else {
+    else */ {
       server.on("/",HTTP_GET, [](AsyncWebServerRequest *request) {
         if(SPIFFS.exists("/index.html.gz") ){
           #ifndef LIGHT_FIRMWARE
@@ -150,6 +150,10 @@ void call_pages() {
       {"/enphase.json", "/enphase.json"},
       {"/js/all.min.js", "/js/all.min.js"},
       {"/css/all.min.css", "/css/all.min.css"},
+      {"/icons.svg", "/icons.svg"},
+      {"/js/app.js", "/js/app.js"},
+      {"/css/style.css", "/css/style.css"}
+
     };
   
     for (const auto& file : staticFiles) {
@@ -384,9 +388,9 @@ void call_pages() {
       if (request->hasParam("mqttpassword")) {
         char password[65];  
         request->getParam("mqttpassword")->value().toCharArray(password,65);
-        if (strcmp(password,SECURITEPASS) != 0) {  ///sécurisation du mot de passe pas en clair     
+        //if (strcmp(password,SECURITEPASS) != 0) {  ///sécurisation du mot de passe pas en clair     
           request->getParam("mqttpassword")->value().toCharArray(configmqtt.password,65); 
-        }
+        //}
         logging.Set_log_init(configmqtt.savemqtt().c_str(),true); // configuration sauvegardée
       }
 
