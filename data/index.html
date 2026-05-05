@@ -23,47 +23,47 @@
     <nav>
       <a href="#dashboard">
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-dashboard"/></svg>
-        Dashboard
+        <span data-i18n="nav.dashboard">Dashboard</span>
       </a>
       <a href="#config">
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-config"/></svg>
-        Configuration
+        <span data-i18n="nav.config">Configuration</span>
       </a>
       <a href="#wifi">
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-wifi"/></svg>
-        WiFi
+        <span data-i18n="nav.wifi">WiFi</span>
       </a>
       <a href="#mqtt">
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-mqtt"/></svg>
-        MQTT
+        <span data-i18n="nav.mqtt">MQTT</span>
       </a>
       <a href="#minuteur">
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-timer"/></svg>
-        Minuteur
+        <span data-i18n="nav.minuteur">Minuteur</span>
       </a>
       <a href="#envoy">
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-solar"/></svg>
-        Envoy
+        <span data-i18n="nav.envoy">Envoy</span>
       </a>
       <div class="divider"></div>
       <a href="#log">
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-log"/></svg>
-        Console Logs
+        <span data-i18n="nav.log">Console Logs</span>
       </a>
       <a href="#backup">
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-backup"/></svg>
-        Sauvegardes
+        <span data-i18n="nav.backup">Sauvegardes</span>
       </a>
       <div class="divider"></div>
       <a href="/update" style="color:var(--text-sidebar)">
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-update"/></svg>
-        OTA Update
+        <span data-i18n="nav.update">OTA Update</span>
       </a>
     </nav>
     <div class="sidebar-footer">
-      <button onclick="if(confirm('Redemarrer le routeur ?'))fetch('/reboot')">
+      <button id="rebootBtn">
         <svg viewBox="0 0 16 16" style="width:14px;height:14px;fill:currentColor;vertical-align:-2px;margin-right:4px"><use href="/icons.svg#icon-power"/></svg>
-        Reboot
+        <span data-i18n="topbar.reboot">Reboot</span>
       </button>
     </div>
   </aside>
@@ -74,7 +74,7 @@
         <svg viewBox="0 0 16 16"><path fill="currentColor" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
       </button>
       <div class="status-group">
-        <span class="status-badge on" id="topbar-status">
+        <span class="status-badge" id="topbar-status">
           <svg viewBox="0 0 16 16" style="width:12px;height:12px;fill:currentColor"><use href="/icons.svg#icon-wifi"/></svg>
           WiFi
         </span>
@@ -85,7 +85,11 @@
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-clock"/></svg>
         <span id="clock">--:--:--</span>
       </div>
-      <button class="theme-toggle" id="themeToggle" title="Changer le theme">
+      <select id="langSelect" class="lang-select" data-i18n-title="topbar.lang_title" title="Langue">
+        <option value="fr">FR</option>
+        <option value="en">EN</option>
+      </select>
+      <button class="theme-toggle" id="themeToggle" data-i18n-title="topbar.theme_title" title="Changer le theme">
         <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-moon"/></svg>
       </button>
     </div>
@@ -97,6 +101,7 @@
     </div>
   </main>
 
+  <script src="/js/i18n.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>
