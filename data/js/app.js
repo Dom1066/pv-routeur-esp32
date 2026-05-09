@@ -49,6 +49,8 @@ const App = {
     );
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('overlay').classList.remove('show');
+    const menuToggle = document.getElementById('menuToggle');
+    if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
 
     const pages = {
       dashboard: () => this.loadDashboard(),
@@ -59,6 +61,7 @@ const App = {
       envoy: () => this.loadEnvoy(),
       log: () => this.loadLog(),
       backup: () => this.loadBackup(),
+      security: () => this.loadSecurity(),
     };
     const loader = pages[page];
     if (loader) {
@@ -182,7 +185,7 @@ const App = {
       el.addEventListener('click', () => this.toggleAction(el.dataset.action))
     );
     await this.refreshDashboard();
-    this.refreshTimer = setInterval(() => this.refreshDashboard(), 2000);
+    this.refreshTimer = setInterval(() => this.refreshDashboard(), 3000);
   },
 
   initGauges() {
@@ -211,7 +214,11 @@ const App = {
       const res = await fetch('/state');
       const d = await res.json();
       this.updateDashboard(d);
-    } catch (e) { console.error('State error:', e); }
+    } catch (e) {
+      console.error('State error:', e);
+      const wifiBadge = document.getElementById('topbar-status');
+      if (wifiBadge) { wifiBadge.classList.remove('on'); wifiBadge.classList.add('off'); }
+    }
   },
 
   updateDashboard(d) {
@@ -537,7 +544,7 @@ const App = {
             </div>
             <div class="form-row">
               <div class="form-group"><label>${this.t('form.server')}</label><input type="text" class="form-control" id="server"></div>
-              <div class="form-group"><label>${this.t('form.port')}</label><input type="number" class="form-control" id="port"></div>
+              <div class="form-group"><label>${this.t('form.port')}</label><input type="number" class="form-control" id="port" min="1" max="65535" step="1"></div>
               <div class="form-group"><label>${this.t('form.topic')}</label><input type="text" class="form-control" id="topic"></div>
             </div>
             <div class="form-row">
@@ -550,9 +557,9 @@ const App = {
           <div class="card-header">${this.t('card.domoticz_idx')}</div>
           <div class="card-body">
             <div class="form-row">
-              <div class="form-group"><label>${this.t('form.idx_grid_label')}</label><input type="number" class="form-control" id="IDX"></div>
-              <div class="form-group"><label>${this.t('form.idx_routed_label')}</label><input type="number" class="form-control" id="IDXDIMMER"></div>
-              <div class="form-group"><label>${this.t('form.idx_dallas_label')}</label><input type="number" class="form-control" id="IDXDALLAS"></div>
+              <div class="form-group"><label>${this.t('form.idx_grid_label')}</label><input type="number" class="form-control" id="IDX" min="0" max="65535" step="1"></div>
+              <div class="form-group"><label>${this.t('form.idx_routed_label')}</label><input type="number" class="form-control" id="IDXDIMMER" min="0" max="65535" step="1"></div>
+              <div class="form-group"><label>${this.t('form.idx_dallas_label')}</label><input type="number" class="form-control" id="IDXDALLAS" min="0" max="65535" step="1"></div>
             </div>
           </div>
         </div>
@@ -603,6 +610,8 @@ const App = {
     });
 
     document.getElementById('btn-apply-mqtt').addEventListener('click', async () => {
+      const form = document.getElementById('mqttForm');
+      if (form && !form.checkValidity()) { form.reportValidity(); return; }
       const params = new URLSearchParams();
       params.set('mqttserver', document.getElementById('server').value);
       params.set('mqttport', document.getElementById('port').value);
@@ -614,7 +623,11 @@ const App = {
       params.set('idxdallas', document.getElementById('IDXDALLAS').value);
       params.set('EM', document.getElementById('EM').value);
       try {
-        await fetch('/get?' + params.toString());
+        await fetch('/setmqtt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params.toString(),
+        });
         this.showStatus('mqtt-status', this.t('status.applied'));
       } catch (e) { this.showStatus('mqtt-status', this.t('status.error'), true); }
     });
@@ -995,6 +1008,68 @@ const App = {
     }
   },
 
+  // ---------- Security ----------
+  async loadSecurity() {
+    document.getElementById('pageContent').innerHTML = `
+      <h2 class="page-title">${this.t('page.security')}</h2>
+      <div class="card" style="max-width:480px">
+        <div class="card-body">
+          <p style="color:var(--text-muted);margin-bottom:1.25rem">${this.t('security.subtitle')}</p>
+          <div class="form-check" style="margin-bottom:1.25rem">
+            <input type="checkbox" id="auth_enabled">
+            <label for="auth_enabled">${this.t('security.enable')}</label>
+          </div>
+          <div class="form-group" style="margin-bottom:1.75rem">
+            <label for="auth_pass">${this.t('security.password')}</label>
+            <input type="password" class="form-control" id="auth_pass" autocomplete="new-password">
+          </div>
+          <div id="security-status" class="alert alert-success" style="display:none;margin-bottom:1rem"></div>
+          <button class="btn btn-primary" id="btn-save-security" style="min-width:200px">${this.t('btn.save_settings')}</button>
+        </div>
+      </div>
+    `;
+
+    const syncPassState = () => {
+      const enabled = document.getElementById('auth_enabled').checked;
+      const passField = document.getElementById('auth_pass');
+      if (passField) { passField.disabled = !enabled; passField.style.opacity = enabled ? '1' : '0.5'; }
+    };
+
+    try {
+      const res = await fetch('/getauth');
+      const data = await res.json();
+      const cb = document.getElementById('auth_enabled');
+      if (cb && data.auth_enabled !== undefined) cb.checked = !!data.auth_enabled;
+    } catch (e) { console.error('Security load error:', e); }
+
+    syncPassState();
+    document.getElementById('auth_enabled').addEventListener('change', syncPassState);
+    document.getElementById('btn-save-security').addEventListener('click', () => this.saveSecurity());
+  },
+
+  async saveSecurity() {
+    const enabled = document.getElementById('auth_enabled').checked;
+    const pass = document.getElementById('auth_pass').value;
+    if (enabled && !pass) {
+      this.showStatus('security-status', this.t('security.password_required'), true);
+      return;
+    }
+    const params = new URLSearchParams();
+    params.set('auth_enabled', enabled ? '1' : '0');
+    if (pass) params.set('auth_pass', pass);
+    try {
+      await fetch('/setauth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      });
+      document.getElementById('auth_pass').value = '';
+      this.showStatus('security-status', this.t('status.saved'));
+    } catch (e) {
+      this.showStatus('security-status', this.t('status.error_with', { msg: e.message }), true);
+    }
+  },
+
   // ---------- Helpers ----------
   showStatus(id, msg, isError) {
     const el = document.getElementById(id);
@@ -1043,13 +1118,29 @@ const App = {
   initMenuToggle() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
-    document.getElementById('menuToggle').addEventListener('click', () => {
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('show');
-    });
-    overlay.addEventListener('click', () => {
+    const toggle = document.getElementById('menuToggle');
+
+    const openSidebar = () => {
+      sidebar.classList.add('open');
+      overlay.classList.add('show');
+      if (toggle) toggle.setAttribute('aria-expanded', 'true');
+      const firstLink = sidebar.querySelector('nav a');
+      if (firstLink) firstLink.focus();
+    };
+    const closeSidebar = (returnFocus) => {
       sidebar.classList.remove('open');
       overlay.classList.remove('show');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+      if (returnFocus && toggle) toggle.focus();
+    };
+
+    if (toggle) toggle.addEventListener('click', () => {
+      sidebar.classList.contains('open') ? closeSidebar(false) : openSidebar();
+    });
+    overlay.addEventListener('click', () => closeSidebar(true));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sidebar.classList.contains('open')) closeSidebar(true);
     });
   },
 };

@@ -13,6 +13,7 @@ const I18n = {
       'nav.envoy': 'Envoy',
       'nav.log': 'Console Logs',
       'nav.backup': 'Sauvegardes',
+      'nav.security': 'Sécurité',
       'nav.update': 'OTA Update',
 
       // Topbar / common
@@ -32,11 +33,13 @@ const I18n = {
       'page.envoy': 'Envoy Enphase',
       'page.log': 'Console Logs',
       'page.backup': 'Sauvegarde & Restauration',
+      'page.security': 'Sécurité',
 
       // Buttons
       'btn.apply': 'Appliquer',
       'btn.save': 'Sauvegarder',
       'btn.save_flash': 'Sauvegarder sur la flash',
+      'btn.save_settings': 'Sauvegarder les paramètres',
       'btn.restore': 'Restaurer',
       'btn.download_backup': 'Telecharger la sauvegarde',
       'btn.refresh': 'Rafraichir',
@@ -216,6 +219,12 @@ const I18n = {
       'envoy.refresh': 'Rafraichir',
       'envoy.no_data': 'Aucune donnee',
 
+       // Security page
+      'security.subtitle': 'Limiter l\'accès à votre appareil',
+      'security.enable': 'Activer la protection par mot de passe ( Login: admin )',
+      'security.password': 'Mot de passe',
+      'security.password_required': 'Un mot de passe est requis pour activer la protection',
+
       // Minuteur batterie
       'minuteur.batterie_help': 'Ce minuteur modifie le declenchement de la regulation pour donner la priorite a la charge batterie quand la temperature depasse la consigne.',
 
@@ -257,6 +266,7 @@ const I18n = {
       'nav.envoy': 'Envoy',
       'nav.log': 'Console Logs',
       'nav.backup': 'Backups',
+      'nav.security': 'Security',
       'nav.update': 'OTA Update',
 
       'topbar.reboot': 'Reboot',
@@ -274,10 +284,12 @@ const I18n = {
       'page.envoy': 'Envoy Enphase',
       'page.log': 'Console Logs',
       'page.backup': 'Backup & Restore',
+      'page.security': 'Security',
 
       'btn.apply': 'Apply',
       'btn.save': 'Save',
       'btn.save_flash': 'Save to flash',
+      'btn.save_settings': 'Save settings',
       'btn.restore': 'Restore',
       'btn.download_backup': 'Download backup',
       'btn.refresh': 'Refresh',
@@ -444,6 +456,12 @@ const I18n = {
       'envoy.token': 'Enphase Token',
       'envoy.refresh': 'Refresh',
       'envoy.no_data': 'No data',
+
+      'security.subtitle': 'Limit access to your device',
+      'security.enable': 'Enable password protected device ( Login: admin )',
+      'security.password': 'Password',
+      'security.password_required': 'A password is required to enable protection',
+
 
       'minuteur.batterie_help': 'This timer changes the regulation trigger to give priority to battery charging when temperature exceeds the target.',
 

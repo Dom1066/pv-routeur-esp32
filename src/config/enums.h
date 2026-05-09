@@ -166,6 +166,8 @@ struct Config {
     const char *filename_conf = "/config.json";
     bool NO_AP = false; // pour refuser le mode AP
     int tmin=0;
+    bool auth_enabled = false;
+    String auth_pass = "";
 
   public:
     bool sauve_polarity() {
@@ -266,6 +268,8 @@ struct Config {
       trigger = doc["trigger"] | 10;
       NO_AP = doc["no_ap"] | false;
       tmin = doc["tmin"] | 0;
+      auth_enabled = doc["auth_enabled"] | false;
+      auth_pass = doc["auth_pass"] | "";
 
       // passe à true si au moins une fois elle a été présente
       dallas_present = doc["dallas_present"] | false;
@@ -363,8 +367,11 @@ struct Config {
       doc["dallas_present"] = dallas_present;
       doc["no_ap"] = NO_AP;
       doc["tmin"] = tmin;
+      doc["auth_enabled"] = auth_enabled;
+      doc["auth_pass"] = auth_pass;
       message = "config file saved\r\n";
 
+      
       // Serialize JSON to file
       if (serializeJson(doc, configFile) == 0) {
         Serial.println(F("Failed to write to file in function Save configuration "));

@@ -50,6 +50,18 @@ AsyncWebServer server(80);
 String getMinuteur(const Programme& minuteur);
 String getMinuteur();
 String return_Memory();
+bool checkAuth(AsyncWebServerRequest *request);
+
+////***********************************
+//************* checkAuth()
+//***********************************
+
+bool checkAuth(AsyncWebServerRequest *request) {
+    if (!config.auth_enabled) return true;
+    if (request->authenticate("admin", config.auth_pass.c_str())) return true;
+    request->requestAuthentication("PV Dimmer");
+    return false;
+  }
 
 //***********************************
 //************* notfound()
@@ -131,27 +143,12 @@ void call_pages() {
     // pages  statiques
     // Define static files array with URL paths and file paths
     const char* staticFiles[][2] = {
-   /*   {"/all.min.css", "/all.min.css"},
-      {"/jquery.min.js", "/jquery.min.js"},
-      {"/bootstrap.bundle.min.js", "/bootstrap.bundle.min.js"},
-      {"/bootstrap.bundle.min.js.map", "/bootstrap.bundle.min.js.map"},
-      {"/fa-solid-900.woff2", "/fa-solid-900.woff2"},
-      {"/favicon.ico", "/favicon.ico"},
-      {"/sb-admin-2.min.css", "/sb-admin-2.min.css"},
-      {"/sb-admin-2.js", "/sb-admin-2.js"},
-      {"/log.html", "/log.html"},
-      {"/envoy.html", "/envoy.html"},
-      {"/minuteur.html", "/minuteur.html"},
-      {"/wifi.html", "/wifi.html"},
-      {"/mqtt.html", "/mqtt.html"},*/
       {"/mqtt.json", "/mqtt.json"},
       {"/wifi.json", "/wifi.json"},
-      {"/config.json", "/config.json"},
       {"/enphase.json", "/enphase.json"},
-    /*  {"/js/all.min.js", "/js/all.min.js"},
-      {"/css/all.min.css", "/css/all.min.css"},*/
       {"/icons.svg", "/icons.svg"},
       {"/js/app.js", "/js/app.js"},
+      {"/js/i18n.js", "/js/i18n.js"},
       {"/css/style.css", "/css/style.css"}
 
     };
@@ -164,6 +161,22 @@ void call_pages() {
         server.serveStatic(file[0], SPIFFS, file[1]).setCacheControl("max-age=31536000"); // par contre les autres fichiers sont en cache
       }
     }
+
+      /// sécurité : sécurisation pour ne pas voir le mdp de sécurité dans le fichier config.json
+    server.on("/config.json", HTTP_GET, [](AsyncWebServerRequest *request){
+      if (!checkAuth(request)) return;
+      // envoi du fichier de config sans le mot de passe de sécurité
+      if(SPIFFS.exists("/config.json")){
+        AsyncWebServerResponse *response = request->beginResponse(SPIFFS, "/config.json", "application/json");
+        response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response->addHeader("Pragma", "no-cache");
+        response->addHeader("Expires", "0");
+        request->send(response);
+      }
+      else {
+        serveur_response(request, SPIFFSNO);
+      } 
+    }); 
 
     server.on("/state", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "application/json", getState().c_str());
@@ -240,22 +253,23 @@ void call_pages() {
 
 
     server.on("/reboot", HTTP_ANY, [](AsyncWebServerRequest *request){
-    #ifndef LIGHT_FIRMWARE
-      const int bufferSize = 150; //  Taille du tampon pour stocker le message
-      char raison[bufferSize]; // NOSONAR
-      getLocalTime( &timeinfo );
-      snprintf(raison, bufferSize, "reboot manuel: %s", asctime(&timeinfo) ); 
+      if (!checkAuth(request)) return;
+      #ifndef LIGHT_FIRMWARE
+        const int bufferSize = 150; //  Taille du tampon pour stocker le message
+        char raison[bufferSize]; // NOSONAR
+        getLocalTime( &timeinfo );
+        snprintf(raison, bufferSize, "reboot manuel: %s", asctime(&timeinfo) ); 
 
-        client.publish("memory/Routeur", raison, true);
-    #endif
-    request->redirect("/");
-    yield();
-    delay(1000);
-    yield();
-    delay(1000);
-    yield();
-    config.restart = true;
-    ESP.restart();
+          client.publish("memory/Routeur", raison, true);
+      #endif
+      request->redirect("/");
+      yield();
+      delay(1000);
+      yield();
+      delay(1000);
+      yield();
+      config.restart = true;
+      ESP.restart();
     });
     
     // reset de la detection dallas précédente 
@@ -268,14 +282,58 @@ void call_pages() {
 
     server.onNotFound(notFound);
 
+        // ── GET /getauth ─────────────────────────────────────────────────
+    server.on("/getauth", HTTP_GET, [](AsyncWebServerRequest *request) {
+      if (!checkAuth(request)) return;
+      String json = "{\"auth_enabled\":" + String(config.auth_enabled ? "true" : "false") + "}";
+      request->send(200, "application/json", json);
+    });
+
+    // ── POST /setauth ────────────────────────────────────────────────
+    server.on("/setauth", HTTP_POST, [](AsyncWebServerRequest *request) {
+      if (!checkAuth(request)) return;
+
+      auto has = [&](const char* n) {
+        return request->hasParam(n, true) || request->hasParam(n);
+      };
+      auto val = [&](const char* n) -> String {
+        if (request->hasParam(n, true)) return request->getParam(n, true)->value();
+        if (request->hasParam(n))       return request->getParam(n)->value();
+        return "";
+      };
+
+      if (has("auth_enabled")) {
+        config.auth_enabled = (val("auth_enabled") == "1");
+      }
+      if (has("auth_pass") && val("auth_pass").length() > 0) {
+        config.auth_pass = val("auth_pass");
+      }
+      
+      config.saveConfiguration().c_str();
+      
+      request->send(200, "application/json", "{\"ok\":true}");
+    });
+
     /////////////////////////
     ////// mise à jour parametre d'envoie vers domoticz et récupération des modifications de configurations
     /////////////////////////
     server.on("/get", HTTP_ANY, [] (AsyncWebServerRequest *request) {
+
+      if (!checkAuth(request)) return;
+      // Ajouter ces deux lambdas en tête du handler
+      auto has = [&](const char* n) {
+        return request->hasParam(n, true) || request->hasParam(n);
+      };
+      auto val = [&](const char* n) -> String {
+        if (request->hasParam(n, true)) return request->getParam(n, true)->value();
+        if (request->hasParam(n))       return request->getParam(n)->value();
+        return "";
+      };
+
       ///  doc  /get?disengage_dimmer=on
-      if (request->hasParam(PARAM_INPUT_1)) {
+      if (has(PARAM_INPUT_1)) {
         const char* engagedimmer;
-        if(request->getParam(PARAM_INPUT_1)->value() == "on") {
+        if(val(PARAM_INPUT_1) == "on") {
           engagedimmer = "dimmer disengaged";
           gDisplayValues.dimmer_disengaged = true;
         }
@@ -287,64 +345,64 @@ void call_pages() {
       }
                               
       // doc /get?cycle=x
-      if (request->hasParam(PARAM_INPUT_save)) { Serial.println(F("Saving configuration..."));
+      if (has(PARAM_INPUT_save)) { Serial.println(F("Saving configuration..."));
         logging.Set_log_init(config.saveConfiguration().c_str(),true); // configuration sauvegardée
       }
                               
-      if (request->hasParam(PARAM_INPUT_2)) { 
-        config.cycle = request->getParam(PARAM_INPUT_2)->value().toInt(); 
+      if (has(PARAM_INPUT_2)) { 
+        config.cycle = val(PARAM_INPUT_2).toInt(); 
       }
-      if (request->hasParam(PARAM_INPUT_3)) { 
-        config.readtime = request->getParam(PARAM_INPUT_3)->value().toInt();
+      if (has(PARAM_INPUT_3)) { 
+        config.readtime = val(PARAM_INPUT_3).toInt();
       }
-      if (request->hasParam(PARAM_INPUT_4)) { 
-        config.cosphi = request->getParam(PARAM_INPUT_4)->value().toInt();  
+      if (has(PARAM_INPUT_4)) { 
+        config.cosphi = val(PARAM_INPUT_4).toInt();  
       }
-      if (request->hasParam(PARAM_INPUT_dimmer)) { 
-        request->getParam(PARAM_INPUT_dimmer)->value().toCharArray(config.dimmer,64); 
+      if (has(PARAM_INPUT_dimmer)) { 
+        val(PARAM_INPUT_dimmer).toCharArray(config.dimmer,64); 
         #ifdef WEBSOCKET_CLIENT
         closeWebSocket(); setupWebSocket(); 
         #endif
       }
 
-      if (request->hasParam(PARAM_INPUT_server)) { request->getParam(PARAM_INPUT_server)->value().toCharArray(config.hostname,16);  }
-      if (request->hasParam(PARAM_INPUT_delta)) { config.delta_init = request->getParam(PARAM_INPUT_delta)->value().toInt(); config.batterie_active = false ; config.delta = config.delta_init; } // sauvegarde de la valeur initiale de delta
-      if (request->hasParam(PARAM_INPUT_deltaneg)) { config.deltaneg_init = request->getParam(PARAM_INPUT_deltaneg)->value().toInt(); config.batterie_active = false; config.deltaneg = config.deltaneg_init; } // sauvegarde de la valeur initiale de deltaneg
-      if (request->hasParam(PARAM_INPUT_port)) { config.port = request->getParam(PARAM_INPUT_port)->value().toInt(); }
-      if (request->hasParam(PARAM_INPUT_IDX)) { config.IDX = request->getParam(PARAM_INPUT_IDX)->value().toInt();}
-      if (request->hasParam(PARAM_INPUT_IDXdimmer)) { config.IDXdimmer = request->getParam(PARAM_INPUT_IDXdimmer)->value().toInt();}
-      if (request->hasParam("idxdallas")) { config.IDXdallas = request->getParam("idxdallas")->value().toInt();}
-      if (request->hasParam(PARAM_INPUT_API)) { request->getParam(PARAM_INPUT_API)->value().toCharArray(config.apiKey,64);}
-      if (request->hasParam(PARAM_INPUT_dimmer_power)) {gDisplayValues.dimmer = request->getParam( PARAM_INPUT_dimmer_power)->value().toInt(); gDisplayValues.change = 1 ;  } 
-      if (request->hasParam(PARAM_INPUT_facteur)) { config.facteur = request->getParam(PARAM_INPUT_facteur)->value().toFloat();}
-      if (request->hasParam(PARAM_INPUT_tmax)) { config.tmax = request->getParam(PARAM_INPUT_tmax)->value().toInt();}
-      if (request->hasParam("resistance")) { config.charge1 = request->getParam("resistance")->value().toInt(); config.calcul_charge(); }
-      if (request->hasParam("resistance2")) { config.charge2 = request->getParam("resistance2")->value().toInt(); config.calcul_charge();}
-      if (request->hasParam("resistance3")) { config.charge3 = request->getParam("resistance3")->value().toInt(); config.calcul_charge();}
-      if (request->hasParam("screentime")) { config.ScreenTime = request->getParam("screentime")->value().toInt(); } 
-      if (request->hasParam("voltage")) { config.voltage = request->getParam("voltage")->value().toInt();}
-      if (request->hasParam("offset")) { config.offset = request->getParam("offset")->value().toInt();}
-      if (request->hasParam("trigger")) { config.trigger = request->getParam("trigger")->value().toInt();}
-      if (request->hasParam("mintemp")) { config.tmin = request->getParam("mintemp")->value().toInt();}
+      if (has(PARAM_INPUT_server)) { val(PARAM_INPUT_server).toCharArray(config.hostname,16);  }
+      if (has(PARAM_INPUT_delta)) { config.delta_init = val(PARAM_INPUT_delta).toInt(); config.batterie_active = false ; config.delta = config.delta_init; } // sauvegarde de la valeur initiale de delta
+      if (has(PARAM_INPUT_deltaneg)) { config.deltaneg_init = val(PARAM_INPUT_deltaneg).toInt(); config.batterie_active = false; config.deltaneg = config.deltaneg_init; } // sauvegarde de la valeur initiale de deltaneg
+      if (has(PARAM_INPUT_port)) { config.port = val(PARAM_INPUT_port).toInt(); }
+      if (has(PARAM_INPUT_IDX)) { config.IDX = val(PARAM_INPUT_IDX).toInt();}
+      if (has(PARAM_INPUT_IDXdimmer)) { config.IDXdimmer = val(PARAM_INPUT_IDXdimmer).toInt();}
+      if (has("idxdallas")) { config.IDXdallas = val("idxdallas").toInt();}
+      if (has(PARAM_INPUT_API)) { val(PARAM_INPUT_API).toCharArray(config.apiKey,64);}
+      if (has(PARAM_INPUT_dimmer_power)) {gDisplayValues.dimmer = val( PARAM_INPUT_dimmer_power).toInt(); gDisplayValues.change = 1 ;  } 
+      if (has(PARAM_INPUT_facteur)) { config.facteur = val(PARAM_INPUT_facteur).toFloat();}
+      if (has(PARAM_INPUT_tmax)) { config.tmax = val(PARAM_INPUT_tmax).toInt();}
+      if (has("resistance")) { config.charge1 = val("resistance").toInt(); config.calcul_charge(); }
+      if (has("resistance2")) { config.charge2 = val("resistance2").toInt(); config.calcul_charge();}
+      if (has("resistance3")) { config.charge3 = val("resistance3").toInt(); config.calcul_charge();}
+      if (has("screentime")) { config.ScreenTime = val("screentime").toInt(); } 
+      if (has("voltage")) { config.voltage = val("voltage").toInt();}
+      if (has("offset")) { config.offset = val("offset").toInt();}
+      if (has("trigger")) { config.trigger = val("trigger").toInt();}
+      if (has("mintemp")) { config.tmin = val("mintemp").toInt();}
 
       
       /// @brief  wifi
       bool wifimodif=false ; 
-      if (request->hasParam("ssid")) { 
-        request->getParam("ssid")->value().toCharArray(configwifi.SID,64); wifimodif=true; 
+      if (has("ssid")) { 
+        val("ssid").toCharArray(configwifi.SID,64); wifimodif=true; 
       }
-      if (request->hasParam("password")) { 
+      if (has("password")) { 
         char password[64];  
-        request->getParam("password")->value().toCharArray(password,64);
+        val("password").toCharArray(password,64);
         if (strcmp(password,SECURITEPASS) != 0) {  ///sécurisation du mot de passe pas en clair     
-          request->getParam("password")->value().toCharArray(configwifi.passwd,64); 
+          val("password").toCharArray(configwifi.passwd,64); 
         }      
 
         wifimodif=true; 
       }
-      if (request->hasParam("no_ap")) { 
+      if (has("no_ap")) { 
         config.NO_AP = false;
-        String no_ap_value = request->getParam("no_ap")->value();
+        String no_ap_value = val("no_ap");
         config.NO_AP = (no_ap_value == "true" || no_ap_value == "1");
         Serial.println("No AP mode : " + no_ap_value);
         config.saveConfiguration();
@@ -356,8 +414,8 @@ void call_pages() {
 
 
       // Shelly
-      if (request->hasParam("EM")) { 
-        request->getParam("EM")->value().toCharArray(config.topic_Shelly,100);  
+      if (has("EM")) { 
+        val("EM").toCharArray(config.topic_Shelly,100);  
         #ifdef NORMAL_FIRMWARE
           if (strcmp(config.topic_Shelly,"none") != 0 )  
           client.subscribe(config.topic_Shelly);
@@ -368,44 +426,44 @@ void call_pages() {
 
       // enphase
       bool enphasemodif=false ; 
-      if (request->hasParam("envoyserver")) { request->getParam("envoyserver")->value().toCharArray(configmodule.hostname,16); enphasemodif=true; }
-      if (request->hasParam("envoyport")) { request->getParam("envoyport")->value().toCharArray(configmodule.port,5); enphasemodif=true; }
-      if (request->hasParam("envmodele")) { request->getParam("envmodele")->value().toCharArray(configmodule.envoy,2);  enphasemodif=true;}
-      if (request->hasParam("envversion")) { request->getParam("envversion")->value().toCharArray(configmodule.version,2); enphasemodif=true; }
-      if (request->hasParam("envtoken")) { request->getParam("envtoken")->value().toCharArray(configmodule.token,512); enphasemodif=true; }
+      if (has("envoyserver")) { val("envoyserver").toCharArray(configmodule.hostname,16); enphasemodif=true; }
+      if (has("envoyport")) { val("envoyport").toCharArray(configmodule.port,5); enphasemodif=true; }
+      if (has("envmodele")) { val("envmodele").toCharArray(configmodule.envoy,2);  enphasemodif=true;}
+      if (has("envversion")) { val("envversion").toCharArray(configmodule.version,2); enphasemodif=true; }
+      if (has("envtoken")) { val("envtoken").toCharArray(configmodule.token,512); enphasemodif=true; }
       if (enphasemodif) { 
         saveenphase(enphase_conf, configmodule);
       }
 
       //// MQTT
-      if (request->hasParam(PARAM_INPUT_mqttserver)) { request->getParam(PARAM_INPUT_mqttserver)->value().toCharArray(config.mqttserver,16);  }
-      if (request->hasParam(PARAM_INPUT_publish)) { 
-        request->getParam(PARAM_INPUT_publish)->value().toCharArray(config.Publish,100); 
+      if (has(PARAM_INPUT_mqttserver)) { val(PARAM_INPUT_mqttserver).toCharArray(config.mqttserver,16);  }
+      if (has(PARAM_INPUT_publish)) { 
+        val(PARAM_INPUT_publish).toCharArray(config.Publish,100); 
         logging.Set_log_init(config.saveConfiguration().c_str(),true); // configuration sauvegardée   
       }
-      if (request->hasParam("mqttuser")) { request->getParam("mqttuser")->value().toCharArray(configmqtt.username,50);  }
-      if (request->hasParam("mqttport")) { config.mqttport = request->getParam("mqttport")->value().toInt();}
-      if (request->hasParam("mqttpassword")) {
+      if (has("mqttuser")) { val("mqttuser").toCharArray(configmqtt.username,50);  }
+      if (has("mqttport")) { config.mqttport = val("mqttport").toInt();}
+      if (has("mqttpassword")) {
         char password[65];  
-        request->getParam("mqttpassword")->value().toCharArray(password,65);
+        val("mqttpassword").toCharArray(password,65);
         //if (strcmp(password,SECURITEPASS) != 0) {  ///sécurisation du mot de passe pas en clair     
-          request->getParam("mqttpassword")->value().toCharArray(configmqtt.password,65); 
+          val("mqttpassword").toCharArray(configmqtt.password,65); 
         //}
         logging.Set_log_init(configmqtt.savemqtt().c_str(),true); // configuration sauvegardée
       }
 
       //// Dimmer local
-      if (request->hasParam("Fusiblelocal")) { config.localfuse = request->getParam("Fusiblelocal")->value().toInt();}
-      if (request->hasParam("maxtemp")) { config.tmax = request->getParam("maxtemp")->value().toInt();}
+      if (has("Fusiblelocal")) { config.localfuse = val("Fusiblelocal").toInt();}
+      if (has("maxtemp")) { config.tmax = val("maxtemp").toInt();}
 
       //reset
-      if (request->hasParam(PARAM_INPUT_reset)) {
+      if (has(PARAM_INPUT_reset)) {
         Serial.println("Resetting ESP");  
         ESP.restart();
       }
 
       //// for check boxs in web pages  
-      if (request->hasParam("servermode")) { inputMessage = request->getParam( PARAM_INPUT_servermode)->value();
+      if (has("servermode")) { inputMessage = val(PARAM_INPUT_servermode);
       if (getServermode(inputMessage)) {
         logging.Set_log_init(config.saveConfiguration().c_str(),true); // configuration sauvegardée
         logging.Set_log_init(configmqtt.savemqtt().c_str(),true); // configuration sauvegardée
@@ -414,7 +472,7 @@ void call_pages() {
       }
 
       /// relays : 0 : off , 1 : on , other : switch 
-      if (request->hasParam("relay1")) { int relay = request->getParam("relay1")->value().toInt(); 
+      if (has("relay1")) { int relay = val("relay1").toInt(); 
         if ( relay == 0 ) { digitalWrite(RELAY1 , HIGH); } // correction bug de démarrage en GPIO 0
         else if ( relay == 1 ) { digitalWrite(RELAY1 , LOW); } // correction bug de démarrage en GPIO 0
         else if (relay == 2) { digitalWrite(RELAY1, !digitalRead(RELAY1)); }
@@ -423,7 +481,7 @@ void call_pages() {
         itoa( relaystate, str, 10 );
         request->send(200, "text/html", str );
       }
-      if (request->hasParam("relay2")) { int relay = request->getParam("relay2")->value().toInt(); 
+      if (has("relay2")) { int relay = val("relay2").toInt(); 
         if ( relay == 0) { digitalWrite(RELAY2 , LOW); }
         else if ( relay == 1 ) { digitalWrite(RELAY2 , HIGH); } 
         else if (relay == 2) { digitalWrite(RELAY2, !digitalRead(RELAY2)); }
@@ -432,16 +490,16 @@ void call_pages() {
         itoa( relaystate, str, 10 );
         request->send(200, "text/html", str );
       }
-      if (request->hasParam("SCT_13")) { config.SCT_13 = request->getParam("SCT_13")->value().toInt();  
+      if (has("SCT_13")) { config.SCT_13 = val("SCT_13").toInt();  
         /// la valeur de la sonde doit être entre 20 et 100 ( )
         if (config.SCT_13 < 20) config.SCT_13 = 20;
         if (config.SCT_13 > 100) config.SCT_13 = 100;
       }
 
       //// minuteur 
-      if (request->hasParam("heure_demarrage")) { request->getParam("heure_demarrage")->value().toCharArray(programme.heure_demarrage,6);  }
-      if (request->hasParam("heure_arret")) { request->getParam("heure_arret")->value().toCharArray(programme.heure_arret,6);  }
-      if (request->hasParam("temperature")) { programme.temperature = request->getParam("temperature")->value().toInt();  programme.saveProgramme(); }
+      if (has("heure_demarrage")) { val("heure_demarrage").toCharArray(programme.heure_demarrage,6);  }
+      if (has("heure_arret")) { val("heure_arret").toCharArray(programme.heure_arret,6);  }
+      if (has("temperature")) { programme.temperature = val("temperature").toInt();  programme.saveProgramme(); }
       serveur_response(request,  getconfig());
       }); 
 

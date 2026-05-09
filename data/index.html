@@ -12,7 +12,7 @@
 
   <aside id="sidebar">
     <div class="logo">
-      <svg viewBox="0 0 16 16" style="transform:rotate(-15deg)"><use href="/icons.svg#icon-laugh-wink"/></svg>
+      <svg viewBox="0 0 16 16" aria-hidden="true" style="transform:rotate(-15deg)"><use href="/icons.svg#icon-laugh-wink"/></svg>
       <span>PV Router</span>
     </div>
     <div class="device-info">
@@ -22,47 +22,51 @@
     </div>
     <nav>
       <a href="#dashboard">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-dashboard"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-dashboard"/></svg>
         <span data-i18n="nav.dashboard">Dashboard</span>
       </a>
       <a href="#config">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-config"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-config"/></svg>
         <span data-i18n="nav.config">Configuration</span>
       </a>
       <a href="#wifi">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-wifi"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-wifi"/></svg>
         <span data-i18n="nav.wifi">WiFi</span>
       </a>
       <a href="#mqtt">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-mqtt"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-mqtt"/></svg>
         <span data-i18n="nav.mqtt">MQTT</span>
       </a>
       <a href="#minuteur">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-timer"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-timer"/></svg>
         <span data-i18n="nav.minuteur">Minuteur</span>
       </a>
       <a href="#envoy">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-solar"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-solar"/></svg>
         <span data-i18n="nav.envoy">Envoy</span>
       </a>
       <div class="divider"></div>
       <a href="#log">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-log"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-log"/></svg>
         <span data-i18n="nav.log">Console Logs</span>
       </a>
       <a href="#backup">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-backup"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-backup"/></svg>
         <span data-i18n="nav.backup">Sauvegardes</span>
+      </a>
+      <a href="#security">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-lock"/></svg>
+        <span data-i18n="nav.security">Sécurité</span>
       </a>
       <div class="divider"></div>
       <a href="/update" style="color:var(--text-sidebar)">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-update"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-update"/></svg>
         <span data-i18n="nav.update">OTA Update</span>
       </a>
     </nav>
     <div class="sidebar-footer">
       <button id="rebootBtn">
-        <svg viewBox="0 0 16 16" style="width:14px;height:14px;fill:currentColor;vertical-align:-2px;margin-right:4px"><use href="/icons.svg#icon-power"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true" style="width:14px;height:14px;fill:currentColor;vertical-align:-2px;margin-right:4px"><use href="/icons.svg#icon-power"/></svg>
         <span data-i18n="topbar.reboot">Reboot</span>
       </button>
     </div>
@@ -70,8 +74,8 @@
 
   <header id="topbar">
     <div style="display:flex;align-items:center;gap:.75rem">
-      <button class="menu-toggle" id="menuToggle">
-        <svg viewBox="0 0 16 16"><path fill="currentColor" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu" aria-expanded="false">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
       </button>
       <div class="status-group">
         <span class="status-badge" id="topbar-status">
@@ -82,7 +86,7 @@
     </div>
     <div class="right-group">
       <div class="clock">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-clock"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-clock"/></svg>
         <span id="clock">--:--:--</span>
       </div>
       <select id="langSelect" class="lang-select" data-i18n-title="topbar.lang_title" title="Langue">
@@ -90,7 +94,7 @@
         <option value="en">EN</option>
       </select>
       <button class="theme-toggle" id="themeToggle" data-i18n-title="topbar.theme_title" title="Changer le theme">
-        <svg viewBox="0 0 16 16"><use href="/icons.svg#icon-moon"/></svg>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><use href="/icons.svg#icon-moon"/></svg>
       </button>
     </div>
   </header>
@@ -103,5 +107,6 @@
 
   <script src="/js/i18n.js"></script>
   <script src="/js/app.js"></script>
+
 </body>
 </html>
