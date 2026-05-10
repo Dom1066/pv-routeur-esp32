@@ -14,6 +14,7 @@ const I18n = {
       'nav.log': 'Console Logs',
       'nav.backup': 'Sauvegardes',
       'nav.security': 'Sécurité',
+      'nav.ota': 'OTA Manuel',
       'nav.update': 'OTA Update',
 
       // Topbar / common
@@ -34,6 +35,22 @@ const I18n = {
       'page.log': 'Console Logs',
       'page.backup': 'Sauvegarde & Restauration',
       'page.security': 'Sécurité',
+      'page.ota': 'Mise à jour OTA',
+
+      // OTA Manuel
+      'ota.card_title': 'Vérification de mise à jour',
+      'ota.current_version': 'Version installée',
+      'ota.remote_version': 'Version disponible',
+      'ota.btn_check': 'Vérifier',
+      'ota.checking': 'Vérification...',
+      'ota.btn_install': 'Installer la mise à jour',
+      'ota.check_error': 'Erreur lors de la vérification',
+      'ota.update_available': 'Mise à jour disponible : {ver}',
+      'ota.up_to_date': 'Firmware à jour',
+      'ota.confirm_install': 'Lancer la mise à jour OTA ? Le routeur va redémarrer.',
+      'ota.installing': 'Lancement de la mise à jour...',
+      'ota.install_started': 'Mise à jour lancée. Le routeur va redémarrer.',
+      'ota.install_error': 'Erreur lors du lancement de la mise à jour',
 
       // Buttons
       'btn.apply': 'Appliquer',
@@ -267,6 +284,7 @@ const I18n = {
       'nav.log': 'Console Logs',
       'nav.backup': 'Backups',
       'nav.security': 'Security',
+      'nav.ota': 'Manual OTA',
       'nav.update': 'OTA Update',
 
       'topbar.reboot': 'Reboot',
@@ -285,6 +303,22 @@ const I18n = {
       'page.log': 'Console Logs',
       'page.backup': 'Backup & Restore',
       'page.security': 'Security',
+      'page.ota': 'OTA Update',
+
+      // OTA Manuel
+      'ota.card_title': 'Check for update',
+      'ota.current_version': 'Installed version',
+      'ota.remote_version': 'Available version',
+      'ota.btn_check': 'Check',
+      'ota.checking': 'Checking...',
+      'ota.btn_install': 'Install update',
+      'ota.check_error': 'Error while checking for update',
+      'ota.update_available': 'Update available: {ver}',
+      'ota.up_to_date': 'Firmware is up to date',
+      'ota.confirm_install': 'Start OTA update? The router will reboot.',
+      'ota.installing': 'Starting update...',
+      'ota.install_started': 'Update started. The router will reboot.',
+      'ota.install_error': 'Error starting the update',
 
       'btn.apply': 'Apply',
       'btn.save': 'Save',

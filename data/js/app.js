@@ -62,6 +62,7 @@ const App = {
       log: () => this.loadLog(),
       backup: () => this.loadBackup(),
       security: () => this.loadSecurity(),
+      ota: () => this.loadOta(),
     };
     const loader = pages[page];
     if (loader) {
@@ -1067,6 +1068,100 @@ const App = {
       this.showStatus('security-status', this.t('status.saved'));
     } catch (e) {
       this.showStatus('security-status', this.t('status.error_with', { msg: e.message }), true);
+    }
+  },
+
+  // ---------- OTA Manuel ----------
+  async loadOta() {
+    document.getElementById('pageContent').innerHTML = `
+      <h2 class="page-title">${this.t('page.ota')}</h2>
+      <div class="card" style="max-width:520px">
+        <div class="card-header">${this.t('ota.card_title')}</div>
+        <div class="card-body">
+          <div class="form-row" style="margin-bottom:1rem">
+            <div class="form-group">
+              <label>${this.t('ota.current_version')}</label>
+              <div id="ota-current" style="font-weight:600;font-size:1.1rem;padding:.35rem 0">--</div>
+            </div>
+            <div class="form-group">
+              <label>${this.t('ota.remote_version')}</label>
+              <div id="ota-remote" style="font-weight:600;font-size:1.1rem;padding:.35rem 0">--</div>
+            </div>
+          </div>
+          <div id="ota-result" style="margin-bottom:1rem"></div>
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" id="btn-ota-check">${this.t('ota.btn_check')}</button>
+            <button class="btn btn-success btn-sm" id="btn-ota-install" style="display:none">${this.t('ota.btn_install')}</button>
+          </div>
+          <div id="ota-log" style="margin-top:1rem;font-size:.82rem"></div>
+        </div>
+      </div>
+    `;
+
+    try {
+      const res = await fetch('/state');
+      const d = await res.json();
+      document.getElementById('ota-current').textContent = d.version || '--';
+    } catch (e) {
+      document.getElementById('ota-current').textContent = this.t('status.error');
+    }
+
+    document.getElementById('btn-ota-check').addEventListener('click', () => this.otaCheck());
+    document.getElementById('btn-ota-install').addEventListener('click', () => this.otaInstall());
+  },
+
+  async otaCheck() {
+    const btn = document.getElementById('btn-ota-check');
+    const resultEl = document.getElementById('ota-result');
+    const installBtn = document.getElementById('btn-ota-install');
+    const origLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = this.t('ota.checking');
+    resultEl.innerHTML = '';
+    installBtn.style.display = 'none';
+
+    let remote;
+    try {
+      const res = await fetch('/otacheck');
+      remote = await res.json();
+    } catch (e) {
+      resultEl.innerHTML = `<div class="alert alert-danger show">${this.t('ota.check_error')}</div>`;
+      btn.textContent = origLabel;
+      btn.disabled = false;
+      return;
+    }
+
+    const remoteVersion = String(remote.version || '').trim();
+    document.getElementById('ota-remote').textContent = remoteVersion || '--';
+
+    const currentRaw = document.getElementById('ota-current').textContent.trim();
+    const currentText = currentRaw.replace(/\D/g, '');
+
+    if (!remoteVersion) {
+      resultEl.innerHTML = `<div class="alert alert-danger show">${this.t('ota.check_error')}</div>`;
+    } else if (remoteVersion > currentText) {
+      resultEl.innerHTML = `<div class="alert alert-success show">${this.t('ota.update_available', { ver: remoteVersion })}</div>`;
+      installBtn.style.display = '';
+    } else {
+      resultEl.innerHTML = `<div class="alert alert-success show">${this.t('ota.up_to_date')}</div>`;
+    }
+
+    btn.textContent = origLabel;
+    btn.disabled = false;
+  },
+
+  async otaInstall() {
+    if (!confirm(this.t('ota.confirm_install'))) return;
+    const installBtn = document.getElementById('btn-ota-install');
+    const log = 'ota-log';
+    installBtn.disabled = true;
+    this.appendLog(log, this.t('ota.installing'), 'info');
+    try {
+      await fetch('/otaupdate');
+      this.appendLog(log, this.t('ota.install_started'), 'success');
+    } catch (e) {
+      this.appendLog(log, this.t('ota.install_error'), 'danger');
+      installBtn.disabled = false;
     }
   },
 
