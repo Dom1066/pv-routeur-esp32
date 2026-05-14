@@ -167,7 +167,7 @@ void call_pages() {
     /// service OTA pour vérifier la version du firmware
     server.on("/otacheck", HTTP_GET, [](AsyncWebServerRequest *request) {
       HTTPClient http;
-      http.begin("http://ota.apper-solaire.org/test/version.json");
+      http.begin(OTA_JSON);
       int code = http.GET();
       if (code == 200) {
         request->send(200, "application/json", http.getString());

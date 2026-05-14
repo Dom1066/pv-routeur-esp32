@@ -830,8 +830,33 @@ const App = {
             <div id="restore-log" style="margin-top:1rem;font-size:.82rem;text-align:left"></div>
           </div>
         </div>
+        <div class="card">
+          <div class="card-header">${this.t('backup.card_browser')}</div>
+          <div class="card-body" style="text-align:center">
+            <div id="browser-save-date" style="font-size:.82rem;color:var(--text-muted);margin-bottom:.75rem"></div>
+            <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.5rem">
+              <button class="btn btn-primary btn-sm" id="btn-browser-save">${this.t('btn.browser_save')}</button>
+              <button class="btn btn-outline btn-sm" id="btn-browser-restore" disabled>${this.t('btn.browser_restore')}</button>
+            </div>
+            <div id="browser-log" style="margin-top:1rem;font-size:.82rem;text-align:left"></div>
+          </div>
+        </div>
       </div>
     `;
+
+    const stored = localStorage.getItem('pvrouter_backup');
+    if (stored) {
+      try {
+        const d = JSON.parse(stored);
+        if (d._saved) {
+          document.getElementById('browser-save-date').textContent =
+            this.t('backup.browser_last_save', { date: new Date(d._saved).toLocaleString() });
+        }
+        document.getElementById('btn-browser-restore').disabled = false;
+      } catch (e) {}
+    } else {
+      document.getElementById('browser-save-date').textContent = this.t('backup.browser_no_save');
+    }
 
     document.getElementById('btn-backup').addEventListener('click', () => this.doBackup());
     document.getElementById('btn-restore').addEventListener('click', () => this.doRestore());
@@ -843,6 +868,8 @@ const App = {
         this.appendLog('restore-log', this.t('status.error'), 'danger');
       }
     });
+    document.getElementById('btn-browser-save').addEventListener('click', () => this.doBrowserBackup());
+    document.getElementById('btn-browser-restore').addEventListener('click', () => this.doBrowserRestore());
   },
 
   async doBackup() {
@@ -892,17 +919,71 @@ const App = {
       this.appendLog(log, this.t('backup.select_file'), 'warn');
       return;
     }
-
     let data;
     try {
-      const text = await input.files[0].text();
-      data = JSON.parse(text);
+      data = JSON.parse(await input.files[0].text());
       this.appendLog(log, this.t('backup.file_loaded'), 'success');
     } catch (e) {
       this.appendLog(log, this.t('backup.file_invalid'), 'danger');
       return;
     }
+    await this.applyRestoreData(data, log);
+  },
 
+  async doBrowserBackup() {
+    const log = 'browser-log';
+    document.getElementById(log).innerHTML = '';
+    const requests = [
+      { title: this.t('backup.req.general'), url: '/config', key: 'general' },
+      { title: this.t('backup.req.mqtt'), url: '/getmqtt', key: 'mqtt' },
+      { title: this.t('backup.req.timer_dimmer'), url: '/getminuteur?dimmer', key: 'dimmer_timer' },
+      { title: this.t('backup.req.timer_batterie'), url: '/getminuteur?batterie', key: 'batterie_timer' },
+      { title: this.t('backup.req.timer_relay1'), url: '/getminuteur?relay1', key: 'relay1_timer' },
+      { title: this.t('backup.req.timer_relay2'), url: '/getminuteur?relay2', key: 'relay2_timer' },
+    ];
+    const backup = {};
+    let hasError = false;
+    for (const req of requests) {
+      this.appendLog(log, this.t('backup.loading', { title: req.title }), 'info');
+      try {
+        backup[req.key] = await (await fetch(req.url)).json();
+        this.replaceLastLog(log, this.t('backup.ok', { title: req.title }), 'success');
+      } catch (e) {
+        this.replaceLastLog(log, this.t('backup.fail', { title: req.title }), 'danger');
+        hasError = true;
+      }
+    }
+    if (!hasError) {
+      backup._saved = new Date().toISOString();
+      try {
+        localStorage.setItem('pvrouter_backup', JSON.stringify(backup));
+        document.getElementById('browser-save-date').textContent =
+          this.t('backup.browser_last_save', { date: new Date(backup._saved).toLocaleString() });
+        document.getElementById('btn-browser-restore').disabled = false;
+        this.appendLog(log, this.t('backup.browser_saved'), 'success');
+      } catch (e) {
+        this.appendLog(log, this.t('backup.browser_save_error'), 'danger');
+      }
+    }
+  },
+
+  async doBrowserRestore() {
+    const log = 'browser-log';
+    document.getElementById(log).innerHTML = '';
+    let data;
+    try {
+      const stored = localStorage.getItem('pvrouter_backup');
+      if (!stored) { this.appendLog(log, this.t('backup.browser_empty'), 'warn'); return; }
+      data = JSON.parse(stored);
+    } catch (e) {
+      this.appendLog(log, this.t('backup.file_invalid'), 'danger');
+      return;
+    }
+    this.appendLog(log, this.t('backup.file_loaded'), 'success');
+    await this.applyRestoreData(data, log);
+  },
+
+  async applyRestoreData(data, log) {
     const toBool = v => v === true || v === 'true' || v === 1 || v === '1' || v === 'on';
     const generalToggles = ['dimmerlocal', 'polarity', 'flip'];
     const mqttToggles = ['MQTT', 'HA', 'TRI'];
@@ -1093,6 +1174,15 @@ const App = {
             <button class="btn btn-primary btn-sm" id="btn-ota-check">${this.t('ota.btn_check')}</button>
             <button class="btn btn-success btn-sm" id="btn-ota-install" style="display:none">${this.t('ota.btn_install')}</button>
           </div>
+          <div id="ota-progress-wrap" style="display:none;margin-top:1rem">
+            <div style="display:flex;justify-content:space-between;margin-bottom:.25rem">
+              <span style="font-size:.85rem">${this.t('ota.progress')}</span>
+              <span id="ota-progress-pct" style="font-size:.85rem;font-weight:600">0%</span>
+            </div>
+            <div style="background:var(--border);border-radius:4px;height:14px;overflow:hidden">
+              <div id="ota-progress-bar" style="height:100%;width:0%;background:var(--success);transition:width .4s ease"></div>
+            </div>
+          </div>
           <div id="ota-log" style="margin-top:1rem;font-size:.82rem"></div>
         </div>
       </div>
@@ -1159,10 +1249,52 @@ const App = {
     try {
       await fetch('/otaupdate');
       this.appendLog(log, this.t('ota.install_started'), 'success');
+      this.otaFollowLog();
     } catch (e) {
       this.appendLog(log, this.t('ota.install_error'), 'danger');
       installBtn.disabled = false;
     }
+  },
+
+  otaFollowLog() {
+    let logId = 0;
+    const log = 'ota-log';
+    const wrap = document.getElementById('ota-progress-wrap');
+    if (wrap) wrap.style.display = '';
+    const poll = async () => {
+      if (this.currentPage !== 'ota') return;
+      try {
+        const res = await fetch('/cs?c2=' + logId);
+        const text = await res.text();
+        const parts = text.split(/\}1/);
+        logId = parts.shift();
+        parts.shift();
+        const content = parts.shift();
+        if (content) {
+          content.split('\n').forEach(line => {
+            if (!line.includes('[OTA]')) return;
+            const pctMatch = line.match(/\[OTA\]\s+(\d+)%/);
+            if (pctMatch) {
+              this.otaSetProgress(parseInt(pctMatch[1]));
+            } else {
+              this.appendLog(log, line.trim(), 'info');
+            }
+          });
+        }
+        setTimeout(poll, 1500);
+      } catch (e) {
+        this.appendLog(log, this.t('ota.rebooting'), 'warn');
+        this.otaSetProgress(100);
+      }
+    };
+    setTimeout(poll, 2000);
+  },
+
+  otaSetProgress(pct) {
+    const bar = document.getElementById('ota-progress-bar');
+    const pctEl = document.getElementById('ota-progress-pct');
+    if (bar) bar.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
   },
 
   // ---------- Helpers ----------

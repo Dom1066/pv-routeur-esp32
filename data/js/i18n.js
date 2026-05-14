@@ -51,6 +51,8 @@ const I18n = {
       'ota.installing': 'Lancement de la mise à jour...',
       'ota.install_started': 'Mise à jour lancée. Le routeur va redémarrer.',
       'ota.install_error': 'Erreur lors du lancement de la mise à jour',
+      'ota.rebooting': 'Redémarrage en cours...',
+      'ota.progress': 'Progression',
 
       // Buttons
       'btn.apply': 'Appliquer',
@@ -93,6 +95,14 @@ const I18n = {
       'backup.loading': '{title}...',
       'backup.restored': '{title} restauree',
       'backup.toggle_to': '{key} bascule -> {state}',
+      'backup.card_browser': 'Navigateur',
+      'backup.browser_last_save': 'Dernière sauvegarde : {date}',
+      'backup.browser_no_save': 'Aucune sauvegarde locale',
+      'backup.browser_saved': 'Sauvegardé dans le navigateur',
+      'backup.browser_save_error': 'Erreur lors de la sauvegarde locale',
+      'backup.browser_empty': 'Aucune sauvegarde locale trouvée',
+      'btn.browser_save': 'Sauvegarder ici',
+      'btn.browser_restore': 'Restaurer depuis ici',
 
       // Forms
       'form.server': 'Serveur',
@@ -319,6 +329,8 @@ const I18n = {
       'ota.installing': 'Starting update...',
       'ota.install_started': 'Update started. The router will reboot.',
       'ota.install_error': 'Error starting the update',
+      'ota.rebooting': 'Rebooting...',
+      'ota.progress': 'Progress',
 
       'btn.apply': 'Apply',
       'btn.save': 'Save',
@@ -358,6 +370,14 @@ const I18n = {
       'backup.loading': '{title}...',
       'backup.restored': '{title} restored',
       'backup.toggle_to': '{key} toggled -> {state}',
+      'backup.card_browser': 'Browser',
+      'backup.browser_last_save': 'Last saved: {date}',
+      'backup.browser_no_save': 'No local backup',
+      'backup.browser_saved': 'Saved in browser',
+      'backup.browser_save_error': 'Error saving locally',
+      'backup.browser_empty': 'No local backup found',
+      'btn.browser_save': 'Save here',
+      'btn.browser_restore': 'Restore from here',
 
       'form.server': 'Server',
       'form.port': 'Port',

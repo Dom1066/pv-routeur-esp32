@@ -52,6 +52,7 @@
 #include "functions/minuteur.h"
 #include "functions/unified_dimmer.h"
 #include "functions/webFunctions.h"
+#include "functions/ota.h"
 
 
 //***********************************
@@ -203,7 +204,10 @@ unsigned short measurements[LOCAL_MEASUREMENTS]; // NOSONAR
 //*************   measureIndex dans drawFunction.h
 //***********************************
 unsigned char measureIndex = 0;
-
+// interval test mise à jour Ota
+//unsigned long lastCheck = 0;
+//const unsigned long CHECK_INTERVAL = 1UL * 120UL * 1000UL; // 2 minutes
+bool otaRequested = false;
 //***********************************
 //************* VARIABLES FONCTIONS
 //***********************************
@@ -254,7 +258,10 @@ void setup()
   logging.Set_log_init(buf_int);
   snprintf(temp_buffer, sizeof(temp_buffer), "\n################# %s ############### \n", Starting_System);
   logging.Set_log_init(temp_buffer);
-  
+  snprintf(temp_buffer, sizeof(temp_buffer), "\n##  Firmware : %s ## \n", VERSION);
+  logging.Set_log_init(temp_buffer);
+  snprintf(temp_buffer, sizeof(temp_buffer), "##  File System attendu : %d ## \n\n", FS_RELEASE);
+  logging.Set_log_init(temp_buffer);
   //démarrage file system
   Serial.println("start SPIFFS");
   logging.Set_log_init(Start_filesystem,true);
@@ -905,6 +912,14 @@ static int deltaneg_backup = 0;
       }
     } 
   }
+
+  // gestion OTA 
+
+  if (otaRequested) {
+        otaRequested = false;
+        checkForUpdate();  // bloquant, reboot à la fin si succès
+    }
+
 
   // gestion de la température minimum.
   
