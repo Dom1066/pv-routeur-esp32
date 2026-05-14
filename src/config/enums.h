@@ -260,7 +260,7 @@ struct Config {
       
       dimmerlocal = doc["dimmerlocal"] | false;
       flip = doc["flip"] | true;
-      tmax = doc["tmax"] | 65;
+      tmax = doc["tmax"] | 60;
       localfuse = doc["localfuse"] | 20;
       voltage = doc["voltage"] | 233;
       offset = doc["offset"] | -10;

@@ -5,7 +5,7 @@ const I18n = {
   dict: {
     fr: {
       // Navigation
-      'nav.dashboard': 'Dashboard',
+      'nav.dashboard': 'Tableau de bord',
       'nav.config': 'Configuration',
       'nav.wifi': 'WiFi',
       'nav.mqtt': 'MQTT',
@@ -25,7 +25,7 @@ const I18n = {
       'common.loading': 'Chargement...',
 
       // Page titles
-      'page.dashboard': 'Dashboard',
+      'page.dashboard': 'Tableau de bord',
       'page.config': 'Configuration',
       'page.mqtt': 'Configuration MQTT',
       'page.wifi': 'Configuration WiFi',
@@ -41,11 +41,11 @@ const I18n = {
       'btn.save_flash': 'Sauvegarder sur la flash',
       'btn.save_settings': 'Sauvegarder les paramètres',
       'btn.restore': 'Restaurer',
-      'btn.download_backup': 'Telecharger la sauvegarde',
+      'btn.download_backup': 'Télécharger la sauvegarde',
       'btn.refresh': 'Rafraichir',
       'btn.boost': 'Boost',
       'btn.onoff': 'On/Off',
-      'btn.toggle_screen': 'Basculer ecran',
+      'btn.toggle_screen': 'Basculer écran',
       'btn.start': 'Demarrer',
       'btn.stop': 'Arreter',
 
@@ -74,7 +74,7 @@ const I18n = {
       'backup.ok': '{title} OK',
       'backup.fail': '{title} ERREUR',
       'backup.loading': '{title}...',
-      'backup.restored': '{title} restauree',
+      'backup.restored': '{title} restaurée',
       'backup.toggle_to': '{key} bascule -> {state}',
 
       // Forms
@@ -110,8 +110,8 @@ const I18n = {
 
       // Dashboard
       'dash.power': 'Puissance',
-      'dash.temperature': 'Temperature',
-      'dash.system_states': 'Etats du systeme',
+      'dash.temperature': 'Température',
+      'dash.system_states': 'Etats & commandes',
       'dash.boiler': 'Ballon',
       'dash.timer': 'Minuteur',
       'dash.relay1': 'Relais 1',
@@ -119,11 +119,11 @@ const I18n = {
       'dash.boost': 'Boost',
       'dash.boost_max_label': 'max: {v}',
       'dash.dallas_probes': 'Sondes Dallas',
-      'dash.no_probe': 'Aucune sonde detectee',
+      'dash.no_probe': 'Aucune sonde detectée',
       'dash.probes_present': 'Sondes presentes:',
       'dash.dimmer': 'Dimmer',
-      'dash.grid': 'Reseau',
-      'dash.routed': 'Puissance routee',
+      'dash.grid': 'Réseau',
+      'dash.routed': 'Puissance routée',
 
       // State values
       'state.on': 'ON',
@@ -131,8 +131,8 @@ const I18n = {
       'state.na': 'N/A',
       'state.cooling': 'Refroidissement',
       'state.normal': 'Normal',
-      'state.active': 'Actif',
-      'state.inactive': 'Inactif',
+      'state.active': 'en marche',
+      'state.inactive': 'à l\'arrêt',
       'state.alert_prefix': 'Alerte',
       'state.boost_info': 'Fin: {end} - max: {max}°C',
       'state.boost_max': 'max: {max}°C',
@@ -142,12 +142,12 @@ const I18n = {
       'config.charges': 'Charges',
       'config.child_hostname': 'Child & Hostname',
       'config.dallas_local': 'Dallas Local',
-      'config.security': 'Securite',
-      'config.network': 'Reseau',
+      'config.security': 'Sécurite',
+      'config.network': 'Réseau',
       'config.system': 'Systeme',
       'config.dimmer': 'Dimmer',
       'config.flip': 'Flip',
-      'config.polarity': 'Polarite',
+      'config.polarity': 'Polarité',
       'config.dimmerlocal': 'Dimmer local',
       'config.screen': 'Ecran',
       'form.max_temp': 'Max Temp (°C)',
@@ -185,9 +185,9 @@ const I18n = {
       'form.dimmer_ip': 'Dimmer IP',
       'form.heure_demarrage': 'Heure de demarrage (HH:MM)',
       'form.heure_arret': "Heure d'arret (HH:MM)",
-      'form.temperature_consigne': 'Temperature consigne (°C)',
+      'form.temperature_consigne': 'Température consigne (°C)',
       'form.puissance': 'Puissance (%)',
-      'form.idx_temp_label': 'IDX Temperature',
+      'form.idx_temp_label': 'IDX Température',
       'form.idx_power_label': 'IDX Puissance',
       'form.idx_alarm_label': 'IDX Alarme',
       'form.idx_grid_label': 'IDX Grid Power',
@@ -198,7 +198,7 @@ const I18n = {
       'btn.apply_target': 'Appliquer {target}',
 
       // Status with target
-      'status.applied_target': 'Configuration {target} appliquee',
+      'status.applied_target': 'Configuration {target} appliquée',
 
       // Dimmer button label
       'dash.dimmer_status': 'Dimmer: {state}',
@@ -208,8 +208,8 @@ const I18n = {
       'wifi.ssid': 'SSID',
       'wifi.password': 'Mot de passe',
       'wifi.disable_ap': 'Desactiver le mode AP',
-      'wifi.ap_warning': 'Attention: le mode AP sera desactive apres reboot et ne pourra pas etre reactive si vous changez de reseau.',
-      'wifi.scan': 'Reseaux visibles',
+      'wifi.ap_warning': 'Attention: le mode AP sera desactive apres reboot et ne pourra pas etre reactive si vous changez de réseau.',
+      'wifi.scan': 'Réseaux visibles',
 
       // Envoy / Enphase page
       'envoy.title': 'Configuration Enphase/Envoy',
@@ -217,7 +217,7 @@ const I18n = {
       'envoy.ip': 'Adresse IP Envoy',
       'envoy.token': 'Token Enphase',
       'envoy.refresh': 'Rafraichir',
-      'envoy.no_data': 'Aucune donnee',
+      'envoy.no_data': 'Aucune donnée',
 
        // Security page
       'security.subtitle': 'Limiter l\'accès à votre appareil',
@@ -235,9 +235,9 @@ const I18n = {
       'btn.onoff_oled': 'ON/OFF OLED',
       'form.activate_local_dimmer': 'Activer Dimmer Local',
       'form.local_limiter': 'Limiteur local (%)',
-      'form.connected_load': 'Charge connectee (W)',
-      'form.connected_load2': 'Charge connectee 2 (W)',
-      'form.connected_load3': 'Charge connectee 3 (W)',
+      'form.connected_load': 'Charge connectée (W)',
+      'form.connected_load2': 'Charge connectée 2 (W)',
+      'form.connected_load3': 'Charge connectée 3 (W)',
       'form.delta_label': 'Delta - Limite Conso (W)',
       'form.delta_help': 'Le routage diminuera en dessous',
       'form.deltaneg_label': 'Delta Neg - Limite Injection (W)',
@@ -252,7 +252,7 @@ const I18n = {
       'form.screen_off_label': 'Screen switch off (s)',
       'form.screen_off_help': '0 = toujours allume',
       'form.flip_screen': 'Flip screen',
-      'form.battery_temp': "Temperature d'activation (°C)",
+      'form.battery_temp': "Température d'activation (°C)",
       'form.battery_offset': 'Offset delta batterie (W)',
       'form.battery_offset_help': 'Valeur recommandee: 100W',
     },

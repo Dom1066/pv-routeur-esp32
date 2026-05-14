@@ -49,8 +49,6 @@ const App = {
     );
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('overlay').classList.remove('show');
-    const menuToggle = document.getElementById('menuToggle');
-    if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
 
     const pages = {
       dashboard: () => this.loadDashboard(),
@@ -61,7 +59,6 @@ const App = {
       envoy: () => this.loadEnvoy(),
       log: () => this.loadLog(),
       backup: () => this.loadBackup(),
-      security: () => this.loadSecurity(),
     };
     const loader = pages[page];
     if (loader) {
@@ -80,7 +77,7 @@ const App = {
             <div class="stat-icon blue"><svg viewBox="0 0 16 16"><use href="/icons.svg#icon-bolt"/></svg></div>
             <div class="stat-info">
               <div class="stat-label">${this.t('dash.grid')}</div>
-              <div class="stat-value" id="dash-state">--</div>
+              <div class="stat-value" id="dash-state">--</div>  
               <div class="stat-sub" id="dash-watt">-- W</div>
             </div>
           </div>
@@ -103,6 +100,16 @@ const App = {
             </div>
           </div>
         </div>
+        <div class="card">
+          <div class="stat-card">
+            <div class="stat-icon orange"><svg viewBox="0 0 16 16"><use href="/icons.svg#icon-phone-fill"/></svg></div>
+            <div class="stat-info">
+              <div class="stat-label">Etat ballon</div>
+              <span class="stat-value" id="st-security">--</span>
+            </div>
+          </div>
+        </div>		
+		
       </div>
       <div class="card-grid">
         <div class="card">
@@ -132,7 +139,7 @@ const App = {
           </div>
         </div>
         <div class="card">
-          <div class="card-header">${this.t('dash.temperature')} Dallas</div>
+          <div class="card-header">${this.t('dash.temperature')} </div>
           <div class="card-body">
             <div class="gauge-container">
               <svg class="gauge-svg" viewBox="0 0 160 100">
@@ -153,20 +160,17 @@ const App = {
                 <span class="state-value off" id="st-minuteur">N/A</span>
               </div>
               <div class="state-item">
-                <span class="state-label">Dallas</span>
+                <span class="state-label">Sonde Dallas</span>
                 <span class="state-value off" id="st-dallas">N/A</span>
               </div>
+
               <div class="state-item">
-                <span class="state-label">T°max</span>
-                <span class="state-value off" id="st-security">N/A</span>
+                <span class="state-label">Relais 1</span>
+                <span class="state-value off clickable" id="st-relay1" data-action="relay1">N/A</span>
               </div>
               <div class="state-item">
-                <span class="state-label">${this.t('dash.relay1')}</span>
-                <span class="state-value off" id="st-relay1">N/A</span>
-              </div>
-              <div class="state-item">
-                <span class="state-label">${this.t('dash.relay2')}</span>
-                <span class="state-value off" id="st-relay2">N/A</span>
+                <span class="state-label">Relais 2</span>
+                <span class="state-value off clickable" id="st-relay2" data-action="relay2">N/A</span>
               </div>
               <div class="state-item">
                 <div>
@@ -204,10 +208,23 @@ const App = {
     const pct = range > 0 ? Math.max(0, Math.min(1, (value - min) / range)) : 0;
     el.style.strokeDashoffset = arc * (1 - pct);
     if (colors) {
-      const c = pct < 0.4 ? colors[0] : pct < 0.7 ? colors[1] : colors[2];
+      const c = pct < 0.5 ? colors[0] : pct < 0.56 ? colors[1] : colors[2];
       el.setAttribute('stroke', c);
     }
   },
+  
+   setGauge1(id, value, min, max, colors) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const arc = Math.PI * 60;
+    const range = max - min;
+    const pct = range > 0 ? Math.max(0, Math.min(1, (value - min) / range)) : 0;
+    el.style.strokeDashoffset = arc * (1 - pct);
+    if (colors) {
+      const c = pct < 0.31 ? colors[0] : pct < 0.42 ? colors[1] : pct < 0.60 ? colors[2] : colors[3];
+      el.setAttribute('stroke', c);
+    }
+  }, 
 
   async refreshDashboard() {
     try {
@@ -225,6 +242,7 @@ const App = {
     const watt = parseInt(d.watt) || 0;
     const dimmer = parseInt(d.dimmer) || 0;
     const temp = parseFloat(d.temperature) || 0;
+    const securityActive = typeof d.security === 'string' && d.secutity.trim() !== '' && d.alerte !== 'false';		
 
     // Stat cards
     const stEl = document.getElementById('dash-state');
@@ -236,25 +254,25 @@ const App = {
     const tEl = document.getElementById('dash-temp');
     if (tEl) tEl.textContent = temp.toFixed(1) + ' °C';
 
-    // Gauges - Reseau: -100 to 400 range
-    this.setGauge('gaugeNet', watt, -100, 400, ['var(--danger)', 'var(--success)', 'var(--warning)']);
+    // Gauges - Reseau: -1000 to 1000 range
+    this.setGauge('gaugeNet', watt, -1000, 1000, ['var(--warning)', 'var(--success)', 'var(--warning)']);
     const gn = document.getElementById('gaugeNetVal');
     if (gn) gn.textContent = watt;
 
-    // Power: 0 to 1500
-    this.setGauge('gaugePower', dimmer, 0, 1500, ['var(--danger)', 'var(--warning)', 'var(--success)']);
+    // Power: 0 to 1800
+    this.setGauge('gaugePower', dimmer, 0, 1800, ['var(--success)', 'var(--success)', 'var(--danger)']);
     const gp = document.getElementById('gaugePowerVal');
     if (gp) gp.textContent = dimmer;
 
     // Temp: 0 to 90
-    this.setGauge('gaugeTemp', temp, 0, 90, ['var(--warning)', 'var(--success)', 'var(--danger)']);
+    this.setGauge1('gaugeTemp', temp, 0, 90, ['var(--primary)', 'var(--success)', 'var(--warning)', 'var(--danger)']);
     const gt = document.getElementById('gaugeTempVal');
     if (gt) gt.textContent = Math.round(temp);
 
     // States
     this.setState('st-minuteur', d.minuteur == 1 || d.minuteur === true, this.t('dash.timer'), this.t('state.inactive'), 'warn', 'off');
-    this.setState('st-dallas', d.dallas == 0 || d.dallas === false, 'Connect', 'Disconnect', 'on', 'danger');
-    this.setState('st-security', d.security == 0 || d.security === false, 'OK', this.t('state.cooling'), 'on', 'danger');
+    this.setState('st-dallas', d.dallas == 0 || d.dallas === false, 'Connectée', 'Déconnectée', 'on', 'danger');
+    this.setState('st-security', d.security == 0 || d.security === false || d.security === "false", 'Normal', 'Refroidissement', 'on', 'danger');
     this.setState('st-relay1', d.relay1 == 1 || d.relay1 === true, this.t('state.on'), this.t('state.off'), 'on', 'off');
     this.setState('st-relay2', d.relay2 == 1 || d.relay2 === true, this.t('state.on'), this.t('state.off'), 'on', 'off');
 
@@ -295,7 +313,9 @@ const App = {
 
   async toggleAction(action) {
     try {
-      if (action === 'boost') await fetch('/boost');
+      if (action === 'relay1') await fetch('/get?relay1=2');
+      else if (action === 'relay2') await fetch('/get?relay2=2');
+      else if (action === 'boost') await fetch('/boost');
       else if (action === 'screen') await fetch('/get?servermode=screen');
       setTimeout(() => this.refreshDashboard(), 500);
     } catch (e) { console.error('Toggle error:', e); }

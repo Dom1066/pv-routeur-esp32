@@ -13,7 +13,7 @@
 #endif
 
 #if LANG_FR
-  #define GRID "Reseau" // NOSONAR
+  #define GRID "Conso" // NOSONAR
   #define INJECTION "Injection" // NOSONAR
   #define STABLE "Stable" // NOSONAR
   #define BOOTING "Demarrage" // NOSONAR
