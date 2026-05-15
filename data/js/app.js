@@ -624,7 +624,7 @@ const App = {
       params.set('idxdallas', document.getElementById('IDXDALLAS').value);
       params.set('EM', document.getElementById('EM').value);
       try {
-        await fetch('/setmqtt', {
+        await fetch('/get', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params.toString(),
