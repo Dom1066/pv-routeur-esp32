@@ -21,6 +21,8 @@
   #include "functions/websocket.h"
 #endif
 
+#include "functions/ota.h"
+
 //***********************************
 //************* Variables externes
 //***********************************
@@ -35,7 +37,7 @@ extern Programme programme_marche_forcee;
 extern Programme programme_batterie;
 extern Memory task_mem; 
 extern SemaphoreHandle_t mutex; 
-
+extern bool otaRequested;
 
 //***********************************
 //************* Déclaration de fonctions
@@ -161,6 +163,24 @@ void call_pages() {
         server.serveStatic(file[0], SPIFFS, file[1]).setCacheControl("max-age=31536000"); // par contre les autres fichiers sont en cache
       }
     }
+
+    /// service OTA pour vérifier la version du firmware
+    server.on("/otacheck", HTTP_GET, [](AsyncWebServerRequest *request) {
+      HTTPClient http;
+      http.begin(OTA_JSON);
+      int code = http.GET();
+      if (code == 200) {
+        request->send(200, "application/json", http.getString());
+      } else {
+        request->send(502, "application/json", "{\"error\":\"upstream failed\"}");
+      }
+      http.end();
+    });
+
+    server.on("/otaupdate", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "application/json", "{\"status\":\"Update started\"}");
+         otaRequested = true;
+    });
 
       /// sécurité : sécurisation pour ne pas voir le mdp de sécurité dans le fichier config.json
     server.on("/config.json", HTTP_GET, [](AsyncWebServerRequest *request){

@@ -1,291 +1,632 @@
-# Photovoltaic Router C_Lyric Version 2023 for TTGO T display
+# Photovoltaic Router - ESP32 TTGO T-Display (C_Lyric Version)
 
-The wiki Documentation is [here in French](https://wiki.apper-solaire.org/)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![GitHub stars](https://img.shields.io/github/stars/xlyric/pv-router-esp32.svg)](https://github.com/xlyric/pv-router-esp32/stargazers)
+
+[🇫🇷 Version Française](#français) | [🇬🇧 English Version](#english)
+
+---
+
+## Français <a name="français"></a>
+
+### 🌞 Vue d'ensemble
+
+Ce projet est le **routeur principal** d'un système de routage photovoltaïque intelligent. Il mesure en temps réel les échanges d'énergie au niveau du compteur électrique (via une sonde SCT013 ou famille Shelly ) et pilote des [variateurs AC distants](https://github.com/xlyric/PV-discharge-Dimmer-AC-Dimmer-KIT-Robotdyn) ou directement sur la carte pour maximiser l'autoconsommation solaire.
+
+Le routeur tourne sur un **TTGO T-Display** (ESP32 avec écran couleur intégré) et offre une interface web complète pour le suivi et la configuration.
+( ou un Wemos ESP32 sur la carte dimmer avec un Shelly pour la mesure )
 
 
-Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 
-This work is licensed under a
-[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+> 📚 La documentation complète est disponible sur le [wiki APPER (en français)](https://wiki.apper-solaire.org/)
 
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+Il s'agit du routeur PV opensource de l'association française [APPER](https://www.apper-solaire.org/). La carte est open source, mais vous pouvez la commander directement auprès de l'association. Celle-ci étant reconnue d'intérêt général au regard de la fiscalité française, elle génère un **crédit d'impôt de 60%** pour les particuliers français.
 
-[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
-[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
-[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
-
-# Photovoltaic router
-
-## **Safety reminder**
-
-Before connecting the photovoltaic control board to the electrical grid, ensure compliance with local electrical safety standards:
-
-- Use properly insulated cables to avoid short circuits.
-- Install protective devices, such as circuit breakers, to prevent overloads and short circuits.
-- If unsure, seek the assistance of a qualified professional for installation.
-- Always use Dallas probes to monitor temperatures.
-
-## Table of Contents
-
-1. [History](#history)
-2. [Router Principle](#router-principle)
-3. [Code Upload](#code-upload)
-4. [Router Operation](#router-operation)
-5. [Router Connection](#router-connection)
-6. [Miscellaneous Information](#miscellaneous-information)
-
-# 01 - History <a name="history"></a> 
-
-Welcome to the official documentation of Cyril's photovoltaic router (C\_lyric). This comprehensive resource has been designed to help you install your Photovoltaic router
-
-It's the opensource Pv router from the French association APPER, the board is open source,   
-but you can order it directly from the association and the association being recognized as being of general interest in view of French taxes, it generates a tax credit for French individuals. (60%)
-
-I do not receive any euros from the sale of the cards and all the work of developing the cards and the software is purely voluntary.
-But a little encouragement is always nice.
+Tout le travail de développement des cartes et du logiciel est purement bénévole. Un petit encouragement fait toujours plaisir :
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V3MURX2)
 
-**The DIN format card**: is [available to order on Helloassos](https://www.helloasso.com/associations/apper/formulaires/6) (the TTGO is not provided and the appearance of the card may vary a little) and it is supplied with the DIN support.  
-For European countries, shipping costs are included in the price.
+**La carte au format DIN** est [disponible à la commande sur Helloassos](https://www.helloasso.com/associations/apper/formulaires/6) (le TTGO et les éléments externes ne sont pas fourni ), livrée avec son support DIN. Frais de port inclus pour les pays européens.
 
-[![image-1685646688128.jpg](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-06/scaled-1680-/image-1685646688128.jpg)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-06/image-1685646688128.jpg)
+[![Carte DIN](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-06/scaled-1680-/image-1685646688128.jpg)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-06/image-1685646688128.jpg)
 
-[Back to Top](#table-of-contents)
+---
 
-# 02 - Router principle <a name="router-principle"></a>
+### ✨ Caractéristiques principales
 
-The router take the measurements and [controls the remote](https://github.com/xlyric/PV-discharge-Dimmer-AC-Dimmer-KIT-Robotdyn) or local dimmers.
+- 📊 Mesure en temps réel du flux d'énergie (injection / soutirage réseau)
+- 🎛️ Pilotage de [variateurs AC distants](https://github.com/xlyric/PV-discharge-Dimmer-AC-Dimmer-KIT-Robotdyn) ou locaux (Robotdyn / SSR)
+- 🖥️ Écran couleur intégré (TTGO T-Display) avec indicateurs WiFi
+- 🌐 Interface web complète et responsive (dashboard + configuration)
+- 🔗 Intégration MQTT, Home Assistant, Jeedom, Domoticz
+- 📡 Source d'énergie externe compatible (Shelly EM, Enphase Envoy)
+- 🌡️ Surveillance de la température avec sondes Dallas 18B20
+- ⏱️ Planificateur horaire (minuteur par charge)
+- 🔒 Mécanismes de sécurité intégrés (fusible, sonde température recommandée)
+- 🔄 Mise à jour OTA intégrée
 
-Simpler than a long speech:
+---
 
-![](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/scaled-1680-/image-1695222326034.jpg)
-
-# 03 - Code Upload  <a name="code-upload"></a>
-
-For practical reasons, programming the router is done directly from a web page, from a compatible browser (Chrome or Edge) go to the page: [https://ota.apper-solaire.org/ota.php](https://ota.apper-solaire.org/ota.php)
-
-**In the window that opens, select the serial port to which the TTGO is connected**
-
-**[![image-1665674872288.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/scaled-1680-/image-1665674872288.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/image-1665674872288.png)**
-
-Select “INSTALL PV ROUTER TTGO”
-
-**[![image-1665674808027.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/scaled-1680-/image-1665674808027.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/image-1665674808027.png)**
-
-Validate the installation message.
-
-[![image-1665674840508.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/scaled-1680-/image-1665674840508.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/image-1665674840508.png)
-
-The program is uploaded:
-
-[![image-1665674918358.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/scaled-1680-/image-1665674918358.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/image-1665674918358.png)
-
-### Wifi Configuration
-
-There are a simple methods to connect to wifi: ( or by AP mode )
-
-#### 1) By the serial :
-
-Once programming is done, choose “Log &amp; console”
-
-[![image-1678909501107.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-03/scaled-1680-/image-1678909501107.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-03/image-1678909501107.png)
-
-[![image-1678909558863.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-03/scaled-1680-/image-1678909558863.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-03/image-1678909558863.png)
-
-From there you can use a series of commands to configure your wifi:
-( put your password first )
+### 🔌 Principe de fonctionnement
 
 ```
-pass your_ssid_pass
-ssid your_ssid
+Panneaux solaires
+      │
+      ▼
+[Onduleur] ──────► Réseau électrique
+      │
+      ▼
+[Compteur Linky] ──[Sonde SCT013 ou Shelly]──► [Routeur PV - TTGO T-Display]
+                                                       │
+                                          ┌────────────┴────────────┐
+                                          ▼                         ▼
+                                [Variateur distant]         [Relais locaux]
+                        (PV-Dimmer ESP8266/ESP32)     (Ballon ECS, chauffage…)
+```
 
+Le routeur analyse la direction du courant au compteur :
+- **Injection (négatif)** → surplus solaire → augmentation progressive de la charge
+- **Soutirage (positif)** → consommation réseau → réduction de la charge
+
+L'objectif : maintenir un échange réseau proche de **0 W** en permanence pour maximiser l'autoconsommation.
+
+---
+
+### 🚀 Installation
+
+#### ⚠️ Rappel de sécurité
+
+> Avant de raccorder la carte au réseau électrique, respectez les normes électriques locales :
+> - Utilisez des câbles correctement isolés pour éviter les courts-circuits.
+> - Installez des protections (disjoncteur 2A minimum).
+> - En cas de doute, faites appel à un professionnel qualifié.
+> - Utilisez toujours des sondes Dallas pour surveiller les températures.
+
+#### Méthode 1 : Web OTA (recommandée)
+
+Depuis un navigateur compatible (Chrome ou Edge) :
+
+1. Rendez-vous sur [https://ota.apper-solaire.org/ota.php](https://ota.apper-solaire.org/ota.php)
+2. Sélectionnez le port série auquel le TTGO est connecté
+3. Choisissez **"INSTALL PV ROUTER TTGO"** ou une autre version selon votre carte
+4. Validez le message d'installation — le programme est chargé automatiquement
+
+[![OTA](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/scaled-1680-/image-1665674872288.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/image-1665674872288.png)
+
+#### 🔄 Mises à jour
+
+- Versions officielles disponibles sur : [GitHub Releases](https://github.com/xlyric/pv-router-esp32/releases)
+- Mise à jour OTA directement depuis la page `/update` de l'interface web du routeur
+
+---
+
+### 📡 Configuration WiFi
+
+#### Par port série
+
+Après le flash, ouvrez la console série ("Log & Console") et saisissez :
+
+```
+pass votre_mot_de_passe_wifi
+ssid votre_ssid_wifi
 reboot
 ```
- 
-You can see directly if the wifi configuration is good
 
-[![image-1678909726040.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-03/scaled-1680-/image-1678909726040.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-03/image-1678909726040.png)
+L'écran TTGO affiche l'IP et le niveau de signal WiFi (en haut à droite) :
+- 🟡 Jaune : > -64 dBm (bon)
+- 🟠 Orange : > -70 dBm (moyen)
+- 🔴 Rouge : > -80 dBm (faible)
 
-You will be able to consult IP and the wifi power level directly on the TTGo display (top right)  
-\- in yellow below -64dBm  
-\- in orange below -70dBm  
-\- in red below -80dBm
+#### Par mode AP
 
-[Back to Top](#table-of-contents)
+Connectez-vous au point d'accès WiFi du routeur et configurez votre réseau via l'interface captive.
 
-# 04 - web configuration <a name="router-operation"></a>
+---
 
-### Generality
+### 🖥️ Interface Web
 
-The Photovoltaic Router is responsible for analyzing the direction of the current at the electric meter using the probe (SCT013) placed on the Phase wire.  
-If the current is positive, the house consumes current from the electrical network.  
-If the current is negative, the installed solar panels provide more energy than the house currently consumes.
+Connectez-vous à l'IP affichée sur l'écran TTGO depuis votre navigateur.
 
-The goal of the router is therefore to increase the power of a resistive remote load to compensate for this overproduction.
+#### Dashboard
 
-In general, this load is an energy or heat storage zone which will be necessary at a later time (hot water, mass heating, battery, EV, etc.)
+[![Dashboard](img/index.png)](img/index.png)
 
-We therefore maximize the self-consumption of our photovoltaic installation, and we reduce its impact on the electricity network. (and associated future costs)
+Vous y trouvez :
+- **Sigma (W)** : puissance échangée avec le réseau
+- **Dimmers (%)** : puissance envoyée aux variateurs
+- **Température (°C)** : sonde du 1er variateur ou sonde locale
+- **État** : Stable / Injection / Réseau
+- **Bouton ON/OFF OLED** : commande de l'écran (timer configurable)
 
-### Detail of the web part.
+#### Page de configuration
 
-Once the code has been uploaded via the website and the entire router assembled, it is possible to connect with your web browser to the IP which is displayed on the display of your PV router.
+Accessible via le menu "Configuration" 
 
-You can therefore consult the information reported by the PV router.
+[![Configuration](img/setup.png)](img/setup.png)
 
-[![image-1695289829494.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/scaled-1680-/image-1695289829494.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/image-1695289829494.png)
+---
 
-On this interface you will find a gauge with the power requested from the network (Sigma, in W), the power requested from the dimmers (in %) and the temperature (in °C) reported by the probe of the 1st dimmer if existing (or probe present locally).
+### 🔌 Raccordement électrique
 
-For the power requested from the network there are 3 states which are configurable:
+#### Schéma de câblage
 
-\- Stable: the PV router has stabilized consumption.
+*(Schéma réalisé par Titi)*
 
-\- Injection: The PV router will gradually increase the load to stabilize consumption
+[![Schéma](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/scaled-1680-/image-1695292302393.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/image-1695292302393.png)
 
-\- Grid: The Pv router will reduce the load to limit the needs of the house.
+La carte dispose d'une protection intégrée (fusible verre 0,15A ou automatique), mais il est recommandé de la placer derrière un disjoncteur 2A.
 
-On this interface, there is also an “ON/OFF Oled” button which is responsible for turning the Oled screen of the TTGO T-Display on or off.  
-This can just be a delay on or off until the next button press.  
-(ON/OFF or timer)  
-This delay is configurable in the web configuration interface.
+#### Installation sans variateur distant
 
-This button is also remote on the PV router, it is the right button of the TTGO
+Installez la carte dans le tableau électrique et connectez la sonde SCT013 sur la **phase de sortie du compteur Linky** (entre le Linky et le tableau).
 
-[![image-1648219622636.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-03/scaled-1680-/image-1648219622636.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-03/image-1648219622636.png)
+#### Installation avec variateur distant
 
-### Configuration of the web part.
+En plus de la sonde SCT013, connectez le [variateur Dimmer](https://github.com/xlyric/PV-discharge-Dimmer-AC-Dimmer-KIT-Robotdyn) à l'emplacement prévu sur la carte. Une sonde Dallas 18B20 est fortement recommandée pour éviter toute surchauffe.
 
-On the base page (Dashboard), there is a “Configuration” link which points to the /config.html page
+> Il est conseillé d'alimenter le Robotdyn en aval des résistances du ballon pour une double sécurité thermique.
 
-[![image-1648219745425.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-03/scaled-1680-/image-1648219745425.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-03/image-1648219745425.png)
+#### Recommandations
 
-This page allows you to configure all the features of the router.
+- Sur les ballons en stéatite : n'utilisez qu'une seule résistance pour une régulation plus fine et moins de perturbations réseau.
+- Prenez le plus grand variateur Robotdyn (20A) ou un SSR Random 40A minimum.
+- En cas de puissance élevée, ventilez le dissipateur thermique du variateur (triac).
 
-[![image-1695289940033.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/scaled-1680-/image-1695289940033.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/image-1695289940033.png)
+---
 
-[Back to Top](#table-of-contents)
+### 🎛️ API Web
 
-# 05 - Router operation <a name="router-connection"></a>
+#### État et surveillance
 
+| Endpoint | Méthode | Description |
+|----------|---------|-------------|
+| `/state` | GET | État courant (JSON) |
+| `/stateshort` | GET | État abrégé (JSON) |
+| `/statefull` | GET | État complet (JSON) |
+| `/config` | GET | Configuration (JSON) |
+| `/ping` | GET | Test de connectivité |
 
-# Router connection
+#### Contrôle système
 
-#### Safety Reminder:
+| Endpoint | Description |
+|----------|-------------|
+| `/reboot` | Redémarrage |
+| `/boost` | Mode boost 2h |
+| `/resetdallas` | Réinitialisation sonde Dallas |
 
-Before connecting the photovoltaic control board to the electrical grid, ensure compliance with local electrical safety standards:
+#### Configuration (`/get`)
 
-- Use properly insulated cables to avoid short circuits.
-- Install protective devices, such as circuit breakers, to prevent overloads and short circuits.
-- If unsure, seek the assistance of a qualified professional for installation.
-- Always use Dallas probes to monitor temperatures.
+| Paramètre | Description |
+|-----------|-------------|
+| `?cycle=X` | Cycle de mesure |
+| `?delta=X` | Seuil puissance positive |
+| `?deltaneg=X` | Seuil puissance négative |
+| `?tmax=X` | Température maximale |
+| `?voltage=X` | Tension réseau |
+| `?cosphi=X` | Facteur de puissance |
+| `?offset=X` | Offset de mesure |
+| `?ssid=X` | SSID WiFi |
+| `?pass=X` | Mot de passe WiFi |
+| `?save=1` | Sauvegarde en flash |
 
-#### Schematic diagram :
+#### Relais
 
-Diagram made by Titi.
+- `?relay1=0/1/2` : OFF / ON / Toggle relais 1
+- `?relay2=0/1/2` : OFF / ON / Toggle relais 2
 
-[![image-1695292302393.png](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/scaled-1680-/image-1695292302393.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/image-1695292302393.png)
+#### Minuteurs
 
-The card has its own protection against overloads (.15A glass fuse or automatic), but it is recommended to place it behind a circuit breaker (2A)
+- `GET /getminuteur?dimmer` : Lecture minuteur variateur
+- `ANY /setminuteur` : Réglage (`heure_demarrage`, `heure_arret`, `temperature`, `puissance`)
 
-#### Simple installation:
+#### Intégrations
 
-As part of the installation of the Router card without a dimmer installed, all you have to do is install the card in the electrical panel and connect the SCT013 probe to the jack provided for this purpose.  
-The probe must be at the output phase of your electric meter (between the Linky and the panel).
+| Endpoint | Description |
+|----------|-------------|
+| `/getwifi` | Configuration WiFi |
+| `/getenvoy` | Données Enphase Envoy |
+| `/getmqtt` | Configuration MQTT (JSON) |
+| `/log.txt` | Journal système |
+| `/getmemory` | Utilisation mémoire (JSON) |
+| `/cosphi` | Mesure du facteur de puissance |
 
-#### Installation with Dimmer:
+---
 
-As part of the installation of the Router card with dimmer,  
-In addition to installing the SCT013 probe as previously, you must connect the Dimmer Robotdyn to the location provided on the card.  
-The ball will connect to it.  
-A Dallas 18B20 probe is strongly recommended to avoid any overheating of the tank.
+### 🛠️ Dépannage
 
-It is also strongly recommended to connect the Robotdyn power supply downstream of the tank electronics to have double temperature security. This allows the power to be cut off in the event of a temperature rise.  
-The fault of this type of configuration is that in return it is no longer possible to exceed the max setpoint of the tank set on the original heat tank card.
+#### Problèmes courants
 
-#### Recommendation Appendices:
+- ❌ **Pas de connexion WiFi**
+  - Vérifiez les identifiants réseau
+  - Redémarrez l'appareil
+  - Vérifiez le niveau de signal sur l'écran TTGO
 
-The regulation of the tank by the dimmers (SSR or Robotdyn) is done by chopping the current, this causes disturbances on the electrical network. It is therefore very strongly recommended on soapstone balloons to only use one of the resistors present, which is more than sufficient. The regulation will be finer and will cause fewer disturbances.
+- 🔌 **Mesure de puissance incorrecte**
+  - Vérifiez le positionnement de la sonde SCT013 (phase sortie compteur Linky)
+  - Ajustez les paramètres `cosphi` et `offset` via l'API
 
-The values ​​announced in terms of admissible amperage on the dimmers are fanciful. Connecting too high a load can also lead to excessive heating of the regulation part of the dimmer (tryac) and no longer be controllable by the control part. It is therefore advisable either to limit the power connected to it or to ventilate the radiator to increase heat dissipation. (the more resistant SSRs are a little less impacted than the Robotdyn dimmers)  
-This is why I recommend taking the largest Robotdyn dimmer (20A) or SSR Random 40A minimum.
+- 🌡️ **Sonde de température non détectée**
+  - Vérifiez le câblage Dallas 18B20
+  - Utilisez `/resetdallas` pour forcer une réinitialisation
 
-[Back to Top](#table-of-contents)
-# 06 - Miscellaneous information <a name="miscellaneous-information"></a>
+#### Outils de diagnostic
 
-The router is compatible with MQTT, HA, Jeedom and domoticz.  
-It can also interface with an external power calculation source such as Shelly EM
+- Journal système : `/log.txt`
+- Console série : depuis l'outil OTA → "Log & Console"
+- État complet : `/statefull`
+- Mémoire des tâches : `/getmemory`
 
-## Web API Commands
+---
 
-The router provides several HTTP endpoints for monitoring and control:
+### 🤝 Contribution
 
-### Status and Monitoring
-- `GET /state` - Get current device state (JSON)
-- `GET /stateshort` - Get abbreviated device state (JSON)
-- `GET /statefull` - Get complete device state (JSON)
-- `GET /config` - Get device configuration (JSON)
-- `GET /ping` - Simple connectivity test (returns "pong")
+1. Forkez le projet
+2. Créez une branche (`git checkout -b feature/MaFonctionnalite`)
+3. Commitez vos modifications (`git commit -m 'Ajout MaFonctionnalite'`)
+4. Poussez la branche (`git push origin feature/MaFonctionnalite`)
+5. Ouvrez une Pull Request
 
-### System Control
-- `ANY /reboot` - Restart the device
-- `ANY /resetdallas` - Reset Dallas temperature sensor detection
-- `ANY /boost` - Activate 2-hour boost mode for heating
+---
 
-### Configuration Management
-- `ANY /get` - Main configuration endpoint with multiple parameters:
-  - `?cycle=X` - Set measurement cycle time
-  - `?readtime=X` - Set reading interval
-  - `?cosphi=X` - Set power factor
-  - `?delta=X` - Set positive power threshold
-  - `?deltaneg=X` - Set negative power threshold
-  - `?dimmer_power=X` - Set dimmer power level
-  - `?tmax=X` - Set maximum temperature
-  - `?resistance=X` - Set load resistance value
-  - `?voltage=X` - Set grid voltage
-  - `?offset=X` - Set measurement offset
-  - `?ssid=XXXX` - Set WiFi SSID
-  - `?password=XXXX` - Set WiFi password
-  - `?save=1` - Save configuration to flash
+### 📦 Dépendances
 
-### Timer/Scheduler Control
-- `GET /getminuteur` - Get timer configuration:
-  - `?dimmer` - Get dimmer timer
-  - `?relay1` - Get relay1 timer  
-  - `?relay2` - Get relay2 timer
-  - `?batterie` - Get battery timer
-- `ANY /setminuteur` - Set timer configuration with parameters:
-  - `heure_demarrage=HH:MM` - Set start time
-  - `heure_arret=HH:MM` - Set stop time
-  - `temperature=X` - Set temperature threshold
-  - `puissance=X` - Set power level
+- PlatformIO
+- ESP32 Arduino Core
+- ArduinoJson
+- OneWire
+- DallasTemperature
+- TFT_eSPI (affichage TTGO T-Display)
 
-### Relay Control
-- `?relay1=0` - Turn relay1 OFF
-- `?relay1=1` - Turn relay1 ON  
-- `?relay1=2` - Toggle relay1 state
-- `?relay2=0` - Turn relay2 OFF
-- `?relay2=1` - Turn relay2 ON
-- `?relay2=2` - Toggle relay2 state
+---
 
-### Network and Integration
-- `ANY /getwifi` - Get WiFi configuration
-- `ANY /getenvoy` - Get Enphase Envoy data
-- `ANY /getmqtt` - Get MQTT configuration (JSON)
-- `GET /cosphi` - Get power factor measurement
+### 🛒 Achat du matériel
 
-### Logging and Diagnostics
-- `ANY /log.txt` - Download system log file
-- `ANY /cs` - Get console log output
-- `ANY /getmemory` - Get task memory usage (JSON)
+#### Kit recommandé
 
-### Static Files
-The router serves compressed web assets:
-- CSS, JavaScript, fonts, and HTML files
-- Configuration files (`.json`)
-- Web interface pages
+- **Carte routeur DIN** : vendue par l'[association APPER](https://www.helloasso.com/associations/apper/formulaires/6)
+  - Crédit d'impôt **60%** en France
+  - Frais de port inclus (Europe)
+  - Support DIN fourni
 
-All configuration changes via `/get` endpoint are applied immediately and can be saved with `?save=1` parameter.
+- **Composants additionnels** :
+  - TTGO T-Display (ESP32 avec écran couleur intégré)
+  - Sonde SCT013 (mesure de courant)
+  - Sonde Dallas 18B20 (température)
 
-[Back to Top](#table-of-contents)
+- **Variateur (optionnel)** : voir le projet complémentaire [PV-Dimmer](https://github.com/xlyric/PV-discharge-Dimmer-AC-Dimmer-KIT-Robotdyn)
+
+| Composant | Prix approx. |
+|-----------|-------------|
+| Carte APPER | 25€ |
+| TTGO T-Display | 12€ |
+| Sonde SCT013 | 8€ |
+| **Total** | **~45€** |
+
+---
+
+### 🏆 Crédits
+
+- Développé bénévolement par [Sunstain Tech Solutions](https://sunstain.fr) pour la communauté [APPER](https://www.apper-solaire.org/)
+- Schéma de câblage réalisé par Titi
+- Contributions de la communauté open-source
+- Projet open-source à usage non commercial
+
+---
+
+### 📄 Licence
+
+Ce projet est sous licence [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](http://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+[![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+---
+
+## English <a name="english"></a>
+
+### 🌞 Overview
+
+This project is the **main router** of an intelligent photovoltaic routing system. It measures real-time energy exchanges at the electricity meter (via an SCT013 sensor or Shelly family device) and controls [remote AC dimmers](https://github.com/xlyric/PV-discharge-Dimmer-AC-Dimmer-KIT-Robotdyn) or local dimmers to maximize solar self-consumption.
+
+The router runs on a **TTGO T-Display** (ESP32 with built-in color display) and provides a complete web interface for monitoring and configuration.
+(or a Wemos ESP32 on the dimmer board with a Shelly for power measurement)
+
+> 📚 Full documentation available on the [APPER wiki (French)](https://wiki.apper-solaire.org/)
+
+This is the open-source PV router from the French association [APPER](https://www.apper-solaire.org/). The board is open-source, but you can order it directly from the association. As a recognized public-interest organization under French tax law, purchases generate a **60% tax credit** for French individuals.
+
+All development work is purely voluntary. Encouragements are always welcome:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V3MURX2)
+
+**The DIN format board** is [available to order on Helloassos](https://www.helloasso.com/associations/apper/formulaires/6) (TTGO not included) — shipped with DIN rail mount. Shipping included for European countries.
+
+[![DIN Board](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-06/scaled-1680-/image-1685646688128.jpg)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-06/image-1685646688128.jpg)
+
+---
+
+### ✨ Key Features
+
+- 📊 Real-time energy flow measurement (injection / grid draw)
+- 🎛️ Control of [remote AC dimmers](https://github.com/xlyric/PV-discharge-Dimmer-AC-Dimmer-KIT-Robotdyn) or local dimmers (Robotdyn / SSR)
+- 🖥️ Built-in color display (TTGO T-Display) with WiFi signal indicators
+- 🌐 Comprehensive and responsive web interface (dashboard + configuration)
+- 🔗 MQTT, Home Assistant, Jeedom, Domoticz integration
+- 📡 External energy source support (Shelly EM, Enphase Envoy)
+- 🌡️ Temperature monitoring with Dallas 18B20 sensors
+- ⏱️ Time-based scheduler (timer per load)
+- 🔒 Integrated safety mechanisms (fuse, recommended temperature sensor)
+- 🔄 Built-in OTA updates
+
+---
+
+### 🔌 Operating Principle
+
+```
+Solar panels
+      │
+      ▼
+[Inverter] ──────► Electrical grid
+      │
+      ▼
+[Linky meter] ──[SCT013 sensor or Shelly]──► [PV Router - TTGO T-Display]
+                                                      │
+                                         ┌────────────┴────────────┐
+                                         ▼                         ▼
+                               [Remote dimmer]             [Local relays]
+                       (PV-Dimmer ESP8266/ESP32)     (Water heater, heating…)
+```
+
+The router analyzes the current direction at the electricity meter:
+- **Injection (negative)** → solar surplus → gradually increases the load
+- **Grid draw (positive)** → grid consumption → reduces the load
+
+The goal: keep the grid exchange close to **0 W** at all times to maximize self-consumption.
+
+---
+
+### 🚀 Installation
+
+#### ⚠️ Safety Reminder
+
+> Before connecting the board to the electrical grid, comply with local electrical safety standards:
+> - Use properly insulated cables to avoid short circuits.
+> - Install protective devices (minimum 2A circuit breaker).
+> - If unsure, consult a qualified professional.
+> - Always use Dallas sensors to monitor temperatures.
+
+#### Method 1: Web OTA (Recommended)
+
+From a compatible browser (Chrome or Edge):
+
+1. Go to [https://ota.apper-solaire.org/ota.php](https://ota.apper-solaire.org/ota.php)
+2. Select the serial port connected to the TTGO
+3. Choose **"INSTALL PV ROUTER TTGO"** or another version depending on your board
+4. Confirm the installation — firmware is uploaded automatically
+
+[![OTA](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/scaled-1680-/image-1665674872288.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2022-10/image-1665674872288.png)
+
+#### 🔄 Updates
+
+- Official releases: [GitHub Releases](https://github.com/xlyric/pv-router-esp32/releases)
+- OTA update directly from the router's `/update` web page
+
+---
+
+### 📡 WiFi Configuration
+
+#### Via Serial Port
+
+After flashing, open the serial console ("Log & Console") and type:
+
+```
+pass your_wifi_password
+ssid your_wifi_ssid
+reboot
+```
+
+The TTGO display shows the IP and WiFi signal strength (top right):
+- 🟡 Yellow: > -64 dBm (good)
+- 🟠 Orange: > -70 dBm (fair)
+- 🔴 Red: > -80 dBm (weak)
+
+#### Via AP Mode
+
+Connect to the router's WiFi access point and configure your network through the captive portal interface.
+
+---
+
+### 🖥️ Web Interface
+
+Connect to the IP shown on the TTGO display from your browser.
+
+#### Dashboard
+
+[![Dashboard](img/index.png)](img/index.png)
+
+The dashboard shows:
+- **Sigma (W)**: power exchanged with the grid
+- **Dimmers (%)**: power sent to dimmers
+- **Temperature (°C)**: first dimmer sensor or local sensor
+- **State**: Stable / Injection / Grid
+- **ON/OFF OLED button**: screen control (configurable timer)
+
+#### Configuration Page
+
+Accessible via the "Configuration" menu.
+
+[![Configuration](img/setup.png)](img/setup.png)
+
+---
+
+### 🔌 Electrical Wiring
+
+#### Wiring Diagram
+
+*(Diagram by Titi)*
+
+[![Wiring diagram](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/scaled-1680-/image-1695292302393.png)](https://pvrouteur.apper-solaire.org/uploads/images/gallery/2023-09/image-1695292302393.png)
+
+The board has built-in protection (0.15A glass fuse or automatic), but it is recommended to place it behind a 2A circuit breaker.
+
+#### Simple Installation (no remote dimmer)
+
+Install the board in the electrical panel and connect the SCT013 sensor on the **output phase of the Linky meter** (between Linky and the panel).
+
+#### Installation with Remote Dimmer
+
+In addition to the SCT013 sensor, connect the [Dimmer board](https://github.com/xlyric/PV-discharge-Dimmer-AC-Dimmer-KIT-Robotdyn) to the dedicated connector on the router board. A Dallas 18B20 sensor is strongly recommended to prevent overheating.
+
+> It is advisable to power the Robotdyn dimmer downstream of the water heater heating elements for double thermal safety.
+
+#### Recommendations
+
+- On soapstone tanks: use only one heating element for finer regulation and fewer grid disturbances.
+- Use the largest Robotdyn dimmer (20A) or a minimum 40A Random SSR.
+- For high power loads, add cooling to the dimmer's heat sink (triac).
+
+---
+
+### 🎛️ Web API
+
+#### Status & Monitoring
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/state` | GET | Current state (JSON) |
+| `/stateshort` | GET | Abbreviated state (JSON) |
+| `/statefull` | GET | Full state (JSON) |
+| `/config` | GET | Configuration (JSON) |
+| `/ping` | GET | Connectivity test |
+
+#### System Control
+
+| Endpoint | Description |
+|----------|-------------|
+| `/reboot` | Restart device |
+| `/boost` | Activate 2-hour boost mode |
+| `/resetdallas` | Reset Dallas sensor detection |
+
+#### Configuration (`/get`)
+
+| Parameter | Description |
+|-----------|-------------|
+| `?cycle=X` | Measurement cycle |
+| `?delta=X` | Positive power threshold |
+| `?deltaneg=X` | Negative power threshold |
+| `?tmax=X` | Maximum temperature |
+| `?voltage=X` | Grid voltage |
+| `?cosphi=X` | Power factor |
+| `?offset=X` | Measurement offset |
+| `?ssid=X` | WiFi SSID |
+| `?pass=X` | WiFi password |
+| `?save=1` | Save to flash |
+
+#### Relays
+
+- `?relay1=0/1/2`: OFF / ON / Toggle relay 1
+- `?relay2=0/1/2`: OFF / ON / Toggle relay 2
+
+#### Timers
+
+- `GET /getminuteur?dimmer`: Read dimmer timer
+- `ANY /setminuteur`: Set timer (`heure_demarrage`, `heure_arret`, `temperature`, `puissance`)
+
+#### Integrations
+
+| Endpoint | Description |
+|----------|-------------|
+| `/getwifi` | WiFi configuration |
+| `/getenvoy` | Enphase Envoy data |
+| `/getmqtt` | MQTT configuration (JSON) |
+| `/log.txt` | System log |
+| `/getmemory` | Task memory usage (JSON) |
+| `/cosphi` | Power factor measurement |
+
+---
+
+### 🛠️ Troubleshooting
+
+#### Common Issues
+
+- ❌ **No WiFi connection**
+  - Check network credentials
+  - Restart the device
+  - Check signal level on the TTGO display
+
+- 🔌 **Incorrect power measurement**
+  - Check SCT013 placement on Linky output phase
+  - Adjust `cosphi` and `offset` parameters via the API
+
+- 🌡️ **Temperature sensor not detected**
+  - Check Dallas 18B20 wiring
+  - Use `/resetdallas` to force re-detection
+
+#### Diagnostic Tools
+
+- System log: `/log.txt`
+- Serial console: OTA tool → "Log & Console"
+- Full state: `/statefull`
+- Task memory: `/getmemory`
+
+---
+
+### 🤝 Contributing
+
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+### 📦 Dependencies
+
+- PlatformIO
+- ESP32 Arduino Core
+- ArduinoJson
+- OneWire
+- DallasTemperature
+- TFT_eSPI (TTGO T-Display)
+
+---
+
+### 🛒 Hardware Purchase
+
+#### Recommended Kit
+
+- **DIN Router Board**: sold by [APPER Association](https://www.helloasso.com/associations/apper/formulaires/6)
+  - **60% tax credit** in France
+  - Shipping included (Europe)
+  - DIN rail mount included
+
+- **Additional components**:
+  - TTGO T-Display (ESP32 with built-in color display)
+  - SCT013 sensor (current measurement)
+  - Dallas 18B20 probe (temperature)
+
+- **Dimmer (optional)**: see companion project [PV-Dimmer](https://github.com/xlyric/PV-discharge-Dimmer-AC-Dimmer-KIT-Robotdyn)
+
+| Component | Approx. Price |
+|-----------|--------------|
+| APPER Board | €25 |
+| TTGO T-Display | €12 |
+| SCT013 sensor | €8 |
+| **Total** | **~€45** |
+
+---
+
+### 🏆 Credits
+
+- Voluntarily developed by [Sunstain Tech Solutions](https://sunstain.fr) for the [APPER](https://www.apper-solaire.org/) community
+- Wiring diagram by Titi
+- Open-source community contributions
+- Non-commercial open-source project
+
+---
+
+### 📄 License
+
+This project is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+[![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
