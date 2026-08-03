@@ -157,9 +157,10 @@ void injection2() {
   sigma_read = ( sigma_read / loop ) ;  /// calcul du sigma ( la valeur moyenne ), ne marche bien que dans le cas d'une ondulation symétrique. A voir si nouvelle méthode de calcul. ( valeur théorique : 2047 -> vcc/2)
   int start=0; 
   /// synchronisation sur la porteuse 
-  for(int i = 0; i < loop; i++) {
-    if ( start == 0 && porteuse[i] > 0 && i >= 1) { 
+  for(int i = 2; i < loop; i++) {
+    if ( start == 0 && porteuse[i] > 15 && porteuse[i-1] > 5) {  // on détecte le front montant de la porteuse ( seuil à 15 ) et on vérifie que la valeur précédente est bien en dessous de 5 ( pour éviter les fausses détections ) - modif 03/08/2026
       start = (i-1) ; 
+      break; 
     } 
   }   /// stable sur la carte din entre 18 et 21 
 
