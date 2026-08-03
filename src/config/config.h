@@ -155,7 +155,7 @@ constexpr size_t NTP_UPDATE_INTERVAL_MS = 3600000; /// synch de l'heure toute le
 #endif
 
 #define RELEASE "Version 20260803"
-constexpr const int FS_RELEASE = 20260510;
+constexpr const int FS_RELEASE = 20260514;
 constexpr const char* FS_UPDATE = " !! FS pas à jour !!"; /// paramettre FS pas à jour
 
 #ifdef LIGHT_FIRMWARE
